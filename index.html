@@ -1,68 +1,86 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-
-<link rel="icon" type="image/gif"
-      href="images/fav.gif" />
-<!--css-->
-<link rel="stylesheet" href="css/stream.css" />
-<link href="css/main.css" rel="stylesheet" type="text/css" />
-
+<!DOCTYPE html>
+<html>
 <head>
-    <title>CVSS visualization</title>
+    <link rel="icon" type="image/gif"
+          href="images/fav.gif" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <title>CVSS Explorer</title>
+    <link rel="stylesheet" type="text/css" href="parallel.css" />
 </head>
-
-<body bgcolor="#aaa" text="black" id="mainBody">
-<svg width="2400" height="1300"></svg>
-
-<!--
-<div id="searchHolder"  class="searchHolder">
-  <input id="search">
-  <button type="button" onclick="searchNode()">Search</button>
-  <progress value="0" max="100" id="progBar">
-      <span id="downloadProgress">
-
+<body>
+<div id="header">
+    <h1>CVSS Explorer</h1>
+    <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
+    <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
+    <button title="Export data as CSV" id="export-data">Export</button>
+    <div class="controls">
+        <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
+        <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
+        Lines at <strong id="opacity"></strong> opacity.
+        <span class="settings">
+        <button id="hide-ticks">Hide Ticks</button>
+        <button id="show-ticks" disabled="disabled">Show Ticks</button>
+        <button id="dark-theme">Dark</button>
+        <button id="light-theme" disabled="disabled">Light</button>
       </span>
-  </progress>
-  <label id="progUpdate">
-
-  </label>
-</div> -->
-
-<!-- Spinner when loading -->
-<div id="loadingSpinner">
-    <!-- <span id="progressText"> -->
+    </div>
+    <div style="clear:both;"></div>
+</div>
+<div id="chart">
+    <canvas id="background"></canvas>
+    <canvas id="foreground"></canvas>
+    <canvas id="highlight"></canvas>
+    <svg></svg>
 </div>
 
 
 
-<!--
-<div id="controlHolder"  class="controlHolder">
- <input type="checkbox" id="checkboxP1" visibility="hidden" value="value2" class="check" onclick="check1()">
-<label for="checkbox1"> Order by deadline</label>
+
+<div id="wrap">
+    <div class="third" id="controls">
+        <h3>CVE Groups</h3>
+        <p id="legend">
+        </p>
+
+        <div class="bright">
+            <h3>What is this?</h3>
+            <p>
+                The parallel coordinates displays CVSS v3.0 on 3 main scores. Each CVE Entry is a polyline.
+           <br>
+                <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read this tutorial.</a>
+            </p>
+         </div>
+
+        <div class="little-box">
+            <h3>Controls</h3>
+            <p>
+                <strong>Brush</strong>: Drag vertically along an axis.<br/>
+                <strong>Remove Brush</strong>: Tap the axis background.<br/>
+                <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
+                <strong>Invert Axis</strong>: Tap an axis label.<br/>
+                <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
+            </p>
+        </div>
+
+    </div>
+    <div  class="third">
+        <h3>
+            Top 50 popular terms extracted from CVE Entry descriptions.
+        </h3>
+        <div id="chart2"></div>
+    </div>
+    <div class="third">
+        <h3>Sample of 25 entries <input type="text" id="search" placeholder="Search CVSS..."></input></h3>
+        <p id="food-list">
+        </p>
+    </div>
 </div>
--->
-
-<div id="streamHolder"  class="streamHolder">
-
-
-</div>
-
-<div id="graph"></div>
-<!-- load the d3.js library -->    
-<script src="js/jquery.min.js"></script>
-<script type='text/javascript' src="js/jquery-ui.min.js"> </script>
-<script src="js/d3.v4.js"></script>
-<script src="js/d3.tip.js"></script>
-<link href="css/jquery-ui.css" rel="stylesheet" type="text/css" />
-<script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
-
-
-
-
-<script src="myscripts/main.js"></script>
-<script src="myscripts/tooltip.js"></script>
-<script src="myscripts/util.js"></script>
-
-<script src="myscripts/stream.js"></script>
-
 </body>
+<script src="http://mbostock.github.com/d3/d3.v2.js"></script>
+<script src="http://underscorejs.org/underscore.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="myscripts/cloud.js"></script>
+<script src="myscripts/parallel.js"></script>
+</html>
