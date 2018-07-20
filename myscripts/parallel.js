@@ -103,13 +103,12 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
     });*/
 
 
-<<<<<<< HEAD
-    var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
-    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
+   // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
+   // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
+   // debugger;
+//    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
 
-    debugger;
-=======
->>>>>>> c8287ba5496502123a521e281464b2bb2750df72
+
    data =[];
    for (var i=0; i<raw_data.CVE_Items.length; i++){
        var d = raw_data.CVE_Items[i].impact.baseMetricV3;
@@ -131,6 +130,9 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
            data.push(obj);
        }
     }
+
+    // network *************************************************************************************************
+    colaNetwork();
 
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions = d3.keys(data[0]).filter(function(k) {
@@ -535,16 +537,7 @@ function brush() {
 
 
 
-    // COLA network *************************************************************************************************
-    var nodes = [];
-    var links = [];
-    data.forEach(function(d){
-        if (d.cve.affects.vendor.vendor_data.length>1){
-            nodes.push(d);
-        }
-    });
-
-    colaNetwork(nodes, []);
+    
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
