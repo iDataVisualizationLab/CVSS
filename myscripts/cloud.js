@@ -424,8 +424,8 @@ function drawWordCloud(text_string){
     }
 
     svg_WordCloud = "#chart2";
-    var width2 =500;
-    var height2 = 400;
+    var width2 =1000;
+    var height2 = 600;
 
     var fill = d3.scale.category20b();
 

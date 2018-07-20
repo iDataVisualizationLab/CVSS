@@ -6,8 +6,6 @@
  * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
  */
 
-var widthN = 600,
-    heightN = 600;
 var colorNetwork = d3.scale.category10();
 //function colorNetwork(n) {
 //    var colores_g = ["#3060aa", "#f80", "#f00", "#10aa18", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
@@ -17,8 +15,8 @@ var colorNetwork = d3.scale.category10();
 
 var  svgNetwork = d3.select("#networkPanel")
     .append("svg")
-    .attr("width", widthN)
-    .attr("height",heightN);
+    .attr("width", height)
+    .attr("height",height);
 
 var nodes=[], links=[];
 
@@ -26,7 +24,7 @@ var force = d3.layout.force()
     .gravity(0.1)
     .distance(40)
     .charge(-13)
-    .size([widthN, heightN]);
+    .size([height, height]);
  
 
 

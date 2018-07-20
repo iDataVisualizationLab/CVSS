@@ -3,9 +3,9 @@
 // Released under the BSD License: http://opensource.org/licenses/BSD-3-Clause
 
 var width = document.body.clientWidth,
-    height = d3.max([document.body.clientHeight-540, 240]);
+    height = 600;
 
-var m = [60, 0, 10, 0],
+var m = [60, 0, 10, height],
     w = width - m[1] - m[3],
     h = height - m[0] - m[2],
     xscale = d3.scale.ordinal().rangePoints([0, w], 1),
@@ -521,7 +521,7 @@ function brush() {
 
     legend.selectAll(".color-bar")
         .style("width", function(d) {
-            return Math.ceil(600*tallies[d].length/data.length) + "px"
+            return Math.ceil(400*tallies[d].length/data.length) + "px"
         });
 
     legend.selectAll(".tally")
