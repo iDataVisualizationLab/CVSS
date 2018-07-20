@@ -102,6 +102,11 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
         return d;
     });*/
 
+
+    var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
+    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
+
+    debugger;
    data =[];
    for (var i=0; i<raw_data.CVE_Items.length; i++){
        var d = raw_data.CVE_Items[i].impact.baseMetricV3;
