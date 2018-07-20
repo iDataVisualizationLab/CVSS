@@ -7,7 +7,8 @@
           href="images/fav.gif" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <title>CVSS Explorer</title>
-    <link rel="stylesheet" type="text/css" href="parallel.css" />
+    <link rel="stylesheet" type="text/css" href="styles/parallel.css" />
+    <link rel="stylesheet" type="text/css" href="styles/main.css" />
 </head>
 <body>
 <div id="header">
@@ -39,7 +40,7 @@
 
 
 <div id="wrap">
-    <div class="third" id="controls">
+    <div class="quarter" id="controls">
         <h3>CVE Groups</h3>
         <p id="legend">
         </p>
@@ -67,22 +68,36 @@
         </div>
 
     </div>
-    <div  class="third">
-        <h3>
-            Top 50 popular terms extracted from CVE Entry descriptions.
-        </h3>
-        <div id="chart2"></div>
-    </div>
+
     <div class="third">
         <h3>Sample of 25 entries <input type="text" id="search" placeholder="Search CVSS..."></input></h3>
         <p id="food-list">
         </p>
     </div>
+
+    <div  class="half">
+        <h3>
+            Top 50 popular terms extracted from CVE Entry descriptions.
+        </h3>
+        <div id="chart2"></div>
+    </div>
 </div>
+
+
+<div id="networkPanel" class="roundedBorder">
+
+</div>
+
+
+
 </body>
-<script src="myscripts/d3.v2.js"></script>
+<script src="javascripts/d3.v3.min.js"></script>
 <script src="https://underscorejs.org/underscore.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="myscripts/cloud.js"></script>
 <script src="myscripts/parallel.js"></script>
+
+
+<script src="javascripts/cola.min.js"></script>
+<script src="myscripts/network.js"></script>
 </html>

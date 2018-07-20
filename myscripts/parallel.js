@@ -3,9 +3,9 @@
 // Released under the BSD License: http://opensource.org/licenses/BSD-3-Clause
 
 var width = document.body.clientWidth,
-    height = d3.max([document.body.clientHeight-540, 240]);
+    height = 600;
 
-var m = [60, 0, 10, 0],
+var m = [60, 0, 10, height],
     w = width - m[1] - m[3],
     h = height - m[0] - m[2],
     xscale = d3.scale.ordinal().rangePoints([0, w], 1),
@@ -102,6 +102,13 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
         return d;
     });*/
 
+
+   // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
+   // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
+   // debugger;
+//    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
+
+
    data =[];
    for (var i=0; i<raw_data.CVE_Items.length; i++){
        var d = raw_data.CVE_Items[i].impact.baseMetricV3;
@@ -115,6 +122,7 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
            obj.group = d.cvssV3.baseSeverity;
 
            obj._id = data.length;
+           obj.cve = raw_data.CVE_Items[i].cve;
 
            obj.impactScore = d.impactScore;
            obj.exploitabilityScore = d.exploitabilityScore;
@@ -122,6 +130,9 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
            data.push(obj);
        }
     }
+
+    // network *************************************************************************************************
+    colaNetwork();
 
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions = d3.keys(data[0]).filter(function(k) {
@@ -433,8 +444,6 @@ function brush() {
     var actives = dimensions.filter(function(p) { return !yscale[p].brush.empty(); }),
         extents = actives.map(function(p) { return yscale[p].brush.extent(); });
 
-
-
     // hack to hide ticks beyond extent
     var b = d3.selectAll('.dimension')[0]
         .forEach(function(element, i) {
@@ -512,7 +521,7 @@ function brush() {
 
     legend.selectAll(".color-bar")
         .style("width", function(d) {
-            return Math.ceil(600*tallies[d].length/data.length) + "px"
+            return Math.ceil(400*tallies[d].length/data.length) + "px"
         });
 
     legend.selectAll(".tally")
@@ -528,6 +537,7 @@ function brush() {
 
 
 
+    
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);

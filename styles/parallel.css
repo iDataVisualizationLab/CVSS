@@ -22,7 +22,7 @@ a {
 	color: #5ae;
 }
 #wrap {
-	padding: 0 3.5%;
+	padding: 0 1%;
 }
 svg {
 	font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
@@ -100,16 +100,16 @@ canvas, svg {
 	float: left;
 }
 .quarter {
-	width: 23%;
-	margin: 0 1%;
+	width: 15%;
+	margin: 0 0%;
 }
 .third {
-	width: 31.3%;
-	margin: 0 1%;
+	width: 20%;
+	margin: 0 0%;
 }
 .half {
-	width: 48%;
-	margin: 0 1%;
+	width: 65%;
+	margin: 0 0%;
 }
 h3 {
 	margin: 12px 0 9px;
