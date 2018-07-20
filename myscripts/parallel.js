@@ -103,10 +103,13 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
     });*/
 
 
+<<<<<<< HEAD
     var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
     var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
 
     debugger;
+=======
+>>>>>>> c8287ba5496502123a521e281464b2bb2750df72
    data =[];
    for (var i=0; i<raw_data.CVE_Items.length; i++){
        var d = raw_data.CVE_Items[i].impact.baseMetricV3;
@@ -120,6 +123,7 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
            obj.group = d.cvssV3.baseSeverity;
 
            obj._id = data.length;
+           obj.cve = raw_data.CVE_Items[i].cve;
 
            obj.impactScore = d.impactScore;
            obj.exploitabilityScore = d.exploitabilityScore;
@@ -438,8 +442,6 @@ function brush() {
     var actives = dimensions.filter(function(p) { return !yscale[p].brush.empty(); }),
         extents = actives.map(function(p) { return yscale[p].brush.extent(); });
 
-
-
     // hack to hide ticks beyond extent
     var b = d3.selectAll('.dimension')[0]
         .forEach(function(element, i) {
@@ -533,6 +535,16 @@ function brush() {
 
 
 
+    // COLA network *************************************************************************************************
+    var nodes = [];
+    var links = [];
+    data.forEach(function(d){
+        if (d.cve.affects.vendor.vendor_data.length>1){
+            nodes.push(d);
+        }
+    });
+
+    colaNetwork(nodes, []);
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
