@@ -45,6 +45,10 @@ function getNodeSize(d) {
 function colaNetwork(){
     svgNetwork.selectAll("*").remove();
     data.forEach(function(d){
+        // create new dimensions for data
+        d.vendorNode = {};
+
+
          // Process vendors *******************************************************************
         var listPreNodes1 = [];
         if (d.cve.affects.vendor.vendor_data && d.cve.affects.vendor.vendor_data.length>0){
@@ -68,6 +72,8 @@ function colaNetwork(){
                     nodes[index].data.push(d);
                     obj = nodes[index];
                 }
+               // create new dimensions for data
+               d.vendorNode = obj;
 
                 // Links
                 for (var q=0; q<listPreNodes1.length;q++){

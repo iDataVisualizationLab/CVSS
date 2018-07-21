@@ -133,6 +133,11 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
 
     // network *************************************************************************************************
     colaNetwork();
+    data.forEach(function(d){
+        
+
+    });
+
 
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions = d3.keys(data[0]).filter(function(k) {
