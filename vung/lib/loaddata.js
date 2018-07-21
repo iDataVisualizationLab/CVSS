@@ -4,8 +4,9 @@ let baseScore = 'baseScore';
 let exploitabilityScore = 'exploitabilityScore';
 let baseMetric = 'baseMetricV3';//can be 'baseMetricV2'
 let cvssVersion = 'cvss' + baseMetric.substr(baseMetric.length - 2, 2);
-let wordAccessChain = ["cve", "description", "description_data"];
+let descriptionAccessChain = ["cve", "description", "description_data"];
 let vendorAccessChain = ["cve", "affects", "vendor", "vendor_data"];
+let problemTypeAccessChain = ["cve", "problemtype", "problemtype_data"];
 let impactScoreAccessChain = ['impact', baseMetric, impactScore];
 let exploitabilityScoreAccessChain = ['impact', baseMetric, exploitabilityScore];
 let baseScoreAccessChain = ['impact', baseMetric, cvssVersion, baseScore];
@@ -32,7 +33,7 @@ let scores = {
 };
 let criticalOrder = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 let stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"];
-let removeWords = ["object", "Object", "", " "];
+let removeWords = ["object", "Object", "", " ", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 stopWords = stopWords.concat(removeWords);
 function removeStopWords(words, stopWords) {
     let result = [];
@@ -44,90 +45,52 @@ function removeStopWords(words, stopWords) {
     return result;
 }
 
-function loadDescriptionData(draw) {
-    let topics = d3.keys(scores);
-    d3.json(fileName, function (error, rawData) {
-        if (error) throw error;
-        //Filter data in a year
 
-        let monthFormat = d3.time.format('%b %Y');
-        let cves = rawData['CVE_Items'];
-        let year1 = new Date(year + '-01-01T00:00Z');
-        let year2 = new Date((year + 1) + '-01-01T00:00Z');
-        cves = cves.filter(d => {
-            let date = new Date(d[dateType]);
-            return (date >= year1) && (date < year2);
-        });
-        var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
-        data = data.map(d => {
-            d.date = d.key;
-            d.totalFrequencies = d.values.length;
-            let nestedTopics = d3.nest().key(d => scoreScale(getOverallScore(d))).entries(d.values);
-            let topics = nestedTopics.map(d => {
-                let frequency = d.values.length;
-                let key = d.key;
-
-                let text = "";
-                d.values.forEach(d => {
-                    let descriptions = accessChain(d, wordAccessChain);
-                    descriptions = descriptions.map(d => d.value);
-                    text += ' ' + descriptions.join(' ');
-                    let parts = text.split(/[ '\-\(\)\*":;\[\]|{},.!?]+/);
-                    //Remove stop words
-                    parts = removeStopWords(parts, stopWords);
-                    //Count word frequencies
-                    var counts = parts.reduce(function (obj, word) {
-                        if (!obj[word]) {
-                            obj[word] = 0;
-                        }
-                        obj[word]++;
-                        return obj;
-                    }, {});
-                    //Convert to array of objects
-                    text = d3.keys(counts).map(function (d) {
-                        return {
-                            text: d,
-                            frequency: counts[d],
-                            topic: key
-                        }
-                    }).sort(function (a, b) {//sort the terms by frequency
-                        return b.frequency - a.frequency;
-                    }).filter(function (d) {
-                        return d.text;
-                    });//filter out empty words
-                    text = text.slice(0, Math.min(text.length, 45));
-                });
-                d[d.key] = {
-                    text: text,
-                    frequency: frequency
-                };
-                delete d.key;
-                delete d.values;
-                return d;
-            });
-
-            d.topics = {};
-            topics.sort((a, b) => {
-                let topicA = d3.keys(a)[0];
-                let topicB = d3.keys(b)[0];
-                return topicA.localeCompare(topicB);
-            });
-            topics.forEach(topic => {
-                for (let key in topic) {
-                    d.topics[key] = topic[key];
-                }
-            });
-            delete d.values;
-            delete d.key;
-            return d;
-        }).sort(function (a, b) {//sort by date
-            return monthFormat.parse(a.date) - monthFormat.parse(b.date);
-        });
-        draw(data);
-    });
+let extractors={
+    'vendors': vendorExtractor,
+    'problemTypes': problemTypeExtractor,
+    'descriptions': descriptionExtractor
 }
+function descriptionExtractor(d){
+    let values = d.values;
+    let parts = [];
+    values.forEach(d=>{
+        let descriptions = accessChain(d, descriptionAccessChain);
+        descriptions = descriptions.map(d => d.value);
+        let text = descriptions.join(' ');
+        let words = text.split(/[ '\-\(\)\*":;\[\]|{},.!?]+/);
+        //Remove stopwords
+        words = removeStopWords(words, stopWords);
+        //Take unique since each cve the frequency is 1.
+        words = d3.set(words).values();
+        parts = parts.concat(words);
+    });
+    return parts;
+};
+function problemTypeExtractor(d){
+    let problemTypes = [];
+    d.values.forEach(d => {
+        let probs = accessChain(d, problemTypeAccessChain);
+        probs.forEach(prob=>{
+            prob.description.forEach(desc=>{
+                problemTypes.push(desc.value);
+            });
+        });
+    });
+    return problemTypes;
+}
+function vendorExtractor(d) {
+    let vendors = [];
+    d.values.forEach(d => {
+        let vds = accessChain(d, vendorAccessChain);
+        vendors = vendors.concat(vds.map(d => d["vendor_name"]));
+    });
+    return vendors;
+}
+function productExtractor(d){
 
-function loadVendorData(draw) {
+}
+function loadCloudData(viewOption, draw) {
     let topics = d3.keys(scores);
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
@@ -152,14 +115,10 @@ function loadVendorData(draw) {
             let topics = nestedTopics.map(d => {
                 let frequency = d.values.length;
                 let key = d.key;
-                let text = [];
-                let vendors = [];
-                d.values.forEach(d => {
-                    let vds = accessChain(d, vendorAccessChain);
-                    vendors = vendors.concat(vds.map(d => d["vendor_name"]));
-                });
+                let text;
+                let allTerms = extractors[viewOption](d);
                 //Count frequencies
-                var counts = vendors.reduce(function (obj, word) {
+                var counts = allTerms.reduce(function (obj, word) {
                     if (!obj[word]) {
                         obj[word] = 0;
                     }

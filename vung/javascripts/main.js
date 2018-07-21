@@ -1,9 +1,10 @@
-var width = 1200, height = 600;
+var width = 1000, height = 400;
 var interpolation = "basis";
 var placed = true;
-let maxFontSize = 24;
-let minFontSize = 4;
+let maxFontSize = 40;
+let minFontSize = 8;
 let rotateCorner = 15;
+let backgroundOpacity = 0.1;
 var svg = d3.select("body").append('svg').attr({
     width: width,
     height: height,
@@ -12,16 +13,15 @@ var svg = d3.select("body").append('svg').attr({
 
 var years = d3.range(2002, 2019, 1);
 
-var initialDataset = "EmptyWheel";
-var categories = [];
+var initialView = "vendors";
 var fileName;
 let year = 2018;
 //fileName = document.getElementById("datasetsSelect").value;
 // fileName = "nvdcve-1.0-2016";
 // fileName = "nvdcve-1.0-2017";
-fileName = "nvdcve-1.0-2018-1";
-// fileName = "nvdcve-1.0-2018";
-
+// fileName = "nvdcve-1.0-2018-1";
+fileName = "nvdcve-1.0-2018";
+fileName = "../data/"+fileName +".json";
 function addOptions(controlId, values){
     var select = document.getElementById(controlId);
     for(var i = 0; i < values.length; i++) {
@@ -30,15 +30,12 @@ function addOptions(controlId, values){
         el.textContent = opt;
         el.value = opt;
         select.appendChild(el);
-        // document.getElementById('datasetsSelect').value = initialDataset;
+        document.getElementById(controlId).value = initialView;
     }
-}
-
-addDatasetsOptions();
-function addDatasetsOptions() {
-      //************************************************
     loadData();
 }
+addOptions('viewTypeSelect', d3.keys(extractors));
+
 var spinner;
 function loadData(){
     // START: loader spinner settings ****************************
@@ -54,14 +51,12 @@ function loadData(){
     };
     var target = document.getElementById('loadingSpinner');
     spinner = new Spinner(opts).spin(target);
-    // END: loader spinner settings ****************************
-    fileName = "../data/"+fileName+".json"; // Add data folder path
-    loadVendorData(draw);
+    loadCloudData(initialView, draw);
 }
-function loadNewData(event) {
+function loadNewData() {
     svg.selectAll("*").remove();
-    fileName = this.options[this.selectedIndex].text;
-    loadData();
+    let option = this.options[this.selectedIndex].text;
+    loadCloudData(option, draw);
 }
 
 function draw(data){
@@ -77,7 +72,7 @@ function draw(data){
     .maxFontSize(maxFontSize)
     .data(data);
     var boxes = ws.boxes();
-    
+
     //Display data
     var legendFontSize = 12;
     var legendHeight = boxes.topics.length*legendFontSize;
@@ -92,13 +87,12 @@ function draw(data){
     .x(function(d){return (d.x);})
     .y0(function(d){return d.y0;})
     .y1(function(d){return (d.y0 + d.y); });
-    var color = d3.scale.category10();
     //Display time axes
     var dates = [];
     boxes.data.forEach(row =>{
         dates.push(row.date);
     });
-    
+
     var xAxisScale = d3.scale.ordinal().domain(dates).rangeBands([0, width]);
     var xAxis = d3.svg.axis().orient('bottom').scale(xAxisScale);
     var axisGroup = svg.append('g').attr('transform', 'translate(' + (margins.left) + ',' + (height+margins.top+axisPadding+legendHeight) + ')');
@@ -113,7 +107,7 @@ function draw(data){
     //Main group
     var mainGroup = svg.append('g').attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
     var wordStreamG = mainGroup.append('g');
-    
+
     var topics = boxes.topics;
     mainGroup.selectAll('path')
         .data(boxes.layers)
@@ -121,14 +115,14 @@ function draw(data){
         .append('path')
         .attr('d', area)
         .style('fill', function (d, i) {
-            return color(i);
+            return color(topics[i], 1);
         })
         .attr({
-            'fill-opacity': 0.1,
+            'fill-opacity': backgroundOpacity,
             stroke: 'black',
             'stroke-width': 0.3,
             topic: function(d, i){return topics[i];}
-        }); 
+        });
     var allWords = [];
     d3.map(boxes.data, function(row){
         boxes.topics.forEach(topic=>{
@@ -231,7 +225,7 @@ function draw(data){
             });
             var clonedParentNode = t.parentNode.cloneNode(false);
             clonedParentNode.appendChild(clonedNode);
-            
+
             t.parentNode.parentNode.appendChild(clonedParentNode);
             d3.select(clonedParentNode).attr({
                 cloned: true,
@@ -279,15 +273,15 @@ function draw(data){
         });
 
     });
-    
+
     //Build the legends
     var legendGroup = svg.append('g').attr('transform', 'translate(' + margins.left + ',' + (height+margins.top) + ')');
     var legendNodes = legendGroup.selectAll('g').data(boxes.topics).enter().append('g')
     .attr('transform', function(d, i){return 'translate(' + 10 + ',' + (i*legendFontSize) + ')';});
     legendNodes.append('circle').attr({
         r: 5,
-        fill: function(d, i){return color(i);},
-        'fill-opacity': 0.1,
+        fill: function(d, i){return color(d, 1);},
+        'fill-opacity': backgroundOpacity,
         stroke: 'black',
         'stroke-width': .5,
     });
@@ -320,4 +314,15 @@ function styleGridlineNodes(gridlineNodes){
         'stroke-width': 0.7,
         stroke: 'lightgray'
     });
+}
+var colors = {
+    "CRITICAL":[0,100,50],
+    "HIGH": [35,100,50],
+    "MEDIUM": [60,100,39],
+    "LOW": [120,100,45],
+    "NONE": [0,0,0]
+};
+function color(d,a) {
+    var c = colors[d];
+    return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
 }
