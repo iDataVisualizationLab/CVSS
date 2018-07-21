@@ -11,13 +11,14 @@ var svg = d3.select("body").append('svg').attr({
     id: "mainsvg"
 });
 
-var years = d3.range(2002, 2019, 1);
+var years = d3.range(2014, 2019, 1);
 
 var initialView = "vendors";
 var fileName;
-let year = 2015;
+let year = 2014;
 //fileName = document.getElementById("datasetsSelect").value;
-fileName = "nvdcve-1.0-2015";
+fileName = "nvdcve-1.0-2014";
+// fileName = "nvdcve-1.0-2015";
 // fileName = "nvdcve-1.0-2016";
 // fileName = "nvdcve-1.0-2017";
 // fileName = "nvdcve-1.0-2018-1";
@@ -225,8 +226,8 @@ function draw(data){
             var clonedNode = t.cloneNode(true);
             d3.select(clonedNode).attr({
                 visibility: "visible",
-                stroke: 'none',
-                'stroke-size': 0,
+                stroke: 'white',
+                'stroke-size': 0.2,
                 'style': 'cursor: pointer;'
             }).on("click", ()=>{
                 let relatedCves = searchCVEs(data.date, data.topic, getViewOption(), data.text);
