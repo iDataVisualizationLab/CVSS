@@ -15,10 +15,11 @@ var years = d3.range(2002, 2019, 1);
 
 var initialView = "vendors";
 var fileName;
-let year = 2017;
+let year = 2015;
 //fileName = document.getElementById("datasetsSelect").value;
+fileName = "nvdcve-1.0-2015";
 // fileName = "nvdcve-1.0-2016";
-fileName = "nvdcve-1.0-2017";
+// fileName = "nvdcve-1.0-2017";
 // fileName = "nvdcve-1.0-2018-1";
 // fileName = "nvdcve-1.0-2018";
 fileName = "../data/"+fileName +".json";
@@ -344,5 +345,8 @@ var colors = {
 };
 function color(d,a) {
     var c = colors[d];
+    if(!c){
+        debugger
+    }
     return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
 }

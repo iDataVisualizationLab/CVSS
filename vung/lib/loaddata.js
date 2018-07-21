@@ -3,7 +3,9 @@ let impactScore = 'impactScore';//can be 'baseScore', 'exploitabilityScore'
 let baseScore = 'baseScore';
 let exploitabilityScore = 'exploitabilityScore';
 let baseMetric = 'baseMetricV3';//can be 'baseMetricV2'
-let cvssVersion = 'cvss' + baseMetric.substr(baseMetric.length - 2, 2);
+let baseMetricV2 = 'baseMetricV2';
+let cvssVersion = 'cvssV3';
+let cvssVersionV2 = "cvssV2";
 let descriptionAccessChain = ["cve", "description", "description_data"];
 let vendorAccessChain = ["cve", "affects", "vendor", "vendor_data"];
 let problemTypeAccessChain = ["cve", "problemtype", "problemtype_data"];
@@ -12,6 +14,7 @@ let exploitabilityScoreAccessChain = ['impact', baseMetric, exploitabilityScore]
 let baseScoreAccessChain = ['impact', baseMetric, cvssVersion, baseScore];
 let baseSeverity = "baseSeverity";
 let baseSeverityAccessChain = ['impact', baseMetric, cvssVersion, baseSeverity];
+let baseSeverityAccessChainV2 = ['impact', baseMetricV2, "severity"];
 function getOverallScore(d) {
     let is = accessChain(d, impactScoreAccessChain);
     let es = accessChain(d, exploitabilityScoreAccessChain);
@@ -176,7 +179,7 @@ function loadCloudData(viewOption, draw) {
         data = data.map(d => {
             d.date = d.key;
             d.totalFrequencies = d.values.length;
-            let nestedTopics = d3.nest().key(d => accessChain(d, baseSeverityAccessChain)).entries(d.values);
+            let nestedTopics = d3.nest().key(d => accessChain(d, baseSeverityAccessChain)?accessChain(d, baseSeverityAccessChain): accessChain(d, baseSeverityAccessChainV2)).entries(d.values);
             //Filter the null key
             nestedTopics = nestedTopics.filter(d=>d.key!=='null');
             let topics = nestedTopics.map(d => {
