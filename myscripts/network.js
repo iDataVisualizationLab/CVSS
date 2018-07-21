@@ -73,7 +73,8 @@ function colaNetwork(){
                     obj = nodes[index];
                 }
                // create new dimensions for data
-               d.vendorNode = obj;
+               if (k==0)  // only get the first vendor
+                    d.vendorNode = obj;
 
                 // Links
                 for (var q=0; q<listPreNodes1.length;q++){
@@ -95,7 +96,7 @@ function colaNetwork(){
                 listPreNodes1.push(obj);
 
 
-                /*
+
                 // Process products *******************************************************************
                 if (item.product && item.product.product_data){
                     for (var q=0; q<item.product.product_data.length;q++){
@@ -116,6 +117,10 @@ function colaNetwork(){
                             obj2 = nodes[index];
                         }
 
+                        // create new dimensions for data
+                        if (k==0)  // only get the first vendor
+                            d.productNode = obj2;
+
                          // Links vendor to product ***********************
                         var link = {};
                         link.source = obj;
@@ -129,9 +134,11 @@ function colaNetwork(){
                         else
                             links[indexL].count++;
                     }   
-                }    */
+                }
             }
         }    
+
+
 
        // Process vulnerability types *******************************************************************
        var listPreNodes2 = [];
@@ -145,7 +152,7 @@ function colaNetwork(){
                 if (index<0){
                     obj.name = name;
                     obj.lang = item.lang;  // language
-                    obj.type = "vulnerability type";
+                    obj.type = "vulnerability_type";
                     obj.data = [];   // List of cves
                     obj.data.push(d);
                     nodes.push(obj);
@@ -154,6 +161,11 @@ function colaNetwork(){
                     nodes[index].data.push(d);
                     obj = nodes[index];
                 }
+                // create new dimensions for data
+                if (k==0)  // only get the first vulnerability type
+                    d.problemNode = obj;
+
+
 
                 for (var q=0; q<listPreNodes2.length;q++){
                     var node2 = listPreNodes2[q];
@@ -182,8 +194,6 @@ function colaNetwork(){
             link.name = listPreNodes1[0].name+"_"+listPreNodes2[0].name;
             links.push(link);
         }
-
-
     });
 
     force
