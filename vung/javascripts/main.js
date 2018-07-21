@@ -1,4 +1,4 @@
-var width = 1000, height = 400;
+var width = 1500, height = 1000;
 var interpolation = "basis";
 var placed = true;
 let maxFontSize = 40;
@@ -15,12 +15,12 @@ var years = d3.range(2002, 2019, 1);
 
 var initialView = "vendors";
 var fileName;
-let year = 2018;
+let year = 2017;
 //fileName = document.getElementById("datasetsSelect").value;
 // fileName = "nvdcve-1.0-2016";
-// fileName = "nvdcve-1.0-2017";
+fileName = "nvdcve-1.0-2017";
 // fileName = "nvdcve-1.0-2018-1";
-fileName = "nvdcve-1.0-2018";
+// fileName = "nvdcve-1.0-2018";
 fileName = "../data/"+fileName +".json";
 function addOptions(controlId, values){
     var select = document.getElementById(controlId);
@@ -35,7 +35,11 @@ function addOptions(controlId, values){
     loadData();
 }
 addOptions('viewTypeSelect', d3.keys(extractors));
-
+function getViewOption(){
+    let theViewTypeSelect = document.getElementById('viewTypeSelect');
+    let option = theViewTypeSelect.options[theViewTypeSelect.selectedIndex].text;
+    return option;
+}
 var spinner;
 function loadData(){
     // START: loader spinner settings ****************************
@@ -55,7 +59,7 @@ function loadData(){
 }
 function loadNewData() {
     svg.selectAll("*").remove();
-    let option = this.options[this.selectedIndex].text;
+    let option = getViewOption();
     loadCloudData(option, draw);
 }
 
@@ -213,7 +217,7 @@ function draw(data){
             var data = t.__data__;
             var fontSize = data.fontSize;
             //The point
-            var thePoint = points[data.timeStep+1];;//+1 since we added 1 to the first point and 1 to the last point.
+            var thePoint = points[data.timeStep+1];//+1 since we added 1 to the first point and 1 to the last point.
             thePoint.y = -data.streamHeight;
             //Set it to visible.
             //Clone the nodes.
@@ -222,6 +226,22 @@ function draw(data){
                 visibility: "visible",
                 stroke: 'none',
                 'stroke-size': 0,
+                'style': 'cursor: pointer;'
+            }).on("click", ()=>{
+                let relatedCves = searchCVEs(data.date, data.topic, getViewOption(), data.text);
+                let input =  relatedCves;
+                var options = {
+                    collapsed: true,
+                    withQuotes: false
+                };
+                $('#json-renderer').jsonViewer(input, options);
+                $('#jsviewer').css("visibility", "visible");
+                var svgRect = document.getElementById("mainsvg").getBoundingClientRect();
+                var jsviewer = document.getElementById('jsviewer');
+                jsviewer.style.top = (svgRect.top + svgRect.height + 20) + "px";
+                jsviewer.style.left = (svgRect.left)+"px";
+                jsviewer.style.width = (svgRect.width)+"px";
+
             });
             var clonedParentNode = t.parentNode.cloneNode(false);
             clonedParentNode.appendChild(clonedNode);

@@ -339,6 +339,8 @@ d3.layout.wordStream = function(){
                         d.x0 = -d.x1;
                         d.y0 = -d.y1;
                         d.timeStep = i;
+                        d.date= data[i].date;
+                        d.topic = topic;
                         d.streamHeight = frequencyScale(d.frequency);
                         x += w;
                     }
