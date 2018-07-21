@@ -5,7 +5,7 @@
 var width = document.body.clientWidth,
     height = 600;
 
-var m = [60, 0, 10, height],
+var m = [35, 0, 10, height],
     w = width - m[1] - m[3],
     h = height - m[0] - m[2],
     xscale = d3.scale.ordinal().rangePoints([0, w], 1),
@@ -121,7 +121,7 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
                 obj.name = raw_data.CVE_Items[i].cve.description.description_data[0].value;
            obj.group = d.cvssV3.baseSeverity;
 
-           obj._id = data.length;
+          // obj._id = data.length;
            obj.cve = raw_data.CVE_Items[i].cve;
 
            obj.impactScore = d.impactScore;
@@ -133,10 +133,129 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
 
     // network *************************************************************************************************
     colaNetwork();
-    data.forEach(function(d){
-        
 
+    // Compute vendor order for Parallel Coordinates *****************************************************************************
+    var data2 =[];
+    data.forEach(function(d){ data2.push(d); });
+    data2.sort(function(a,b) {
+        if (a.vendorNode.data && b.vendorNode.data)
+            return a.vendorNode.data.length < b.vendorNode.data.length ? -1 : 1;
+        else if (a.vendorNode.data)
+            return 1;
+        else if (b.vendorNode.data)
+            return -1;
+        else
+            return -1;
     });
+
+    var listVendor = {};
+    var count =0;
+    data2.forEach(function(d){
+        if (d.vendorNode.name==undefined) {
+            if (listVendor["undefined"]==undefined) {
+                listVendor["undefined"] = {};
+                listVendor["undefined"].references = [];
+            }
+            listVendor["undefined"].references.push(d);
+            listVendor["undefined"].order =count;
+            d.vendor=count;
+        }
+        else if (listVendor[d.vendorNode.name]==undefined){
+            listVendor[d.vendorNode.name] = {};
+            listVendor[d.vendorNode.name].references = [];
+            listVendor[d.vendorNode.name].references.push(d);
+            count++;
+            listVendor[d.vendorNode.name].order =count;
+            d.vendor=count;
+        }
+        else{
+            listVendor[d.vendorNode.name].references.push(d);
+            d.vendor=listVendor[d.vendorNode.name].order;
+        }
+    });
+
+    // Compute PRODUCT for Parallel Coordinates *****************************************************************************
+    var data2a =[];
+    data.forEach(function(d){ data2a.push(d); });
+    data2a.sort(function(a,b) {
+        if (a.productNode && a.productNode.data && b.productNode &&  b.productNode.data)
+            return a.productNode.data.length < b.productNode.data.length ? -1 : 1;
+        else if (a.productNode && a.productNode.data)
+            return 1;
+        else if (b.productNode && b.productNode.data)
+            return -1;
+        else
+            return -1;
+    });
+
+    var listProduct = {};
+    var count =0;
+    data2a.forEach(function(d){
+        if (d.productNode== undefined || d.productNode.name==undefined) {
+            if (listProduct["undefined"]==undefined) {
+                listProduct["undefined"] = {};
+                listProduct["undefined"].references = [];
+            }
+            listProduct["undefined"].references.push(d);
+            listProduct["undefined"].order =count;
+            d.product=count;
+        }
+        else if (listProduct[d.productNode.name]==undefined){
+            listProduct[d.productNode.name] = {};
+            listProduct[d.productNode.name].references = [];
+            listProduct[d.productNode.name].references.push(d);
+            count++;
+            listProduct[d.productNode.name].order =count;
+            d.product=count;
+        }
+        else{
+            listProduct[d.productNode.name].references.push(d);
+            d.product=listProduct[d.productNode.name].order;
+        }
+    });
+
+
+    // Compute Vulnerability type order for Parallel Coordinates *****************************************************************************
+    var data3 =[];
+    data.forEach(function(d){ data3.push(d); });
+    data3.sort(function(a,b) {
+        if (a.problemNode.data && b.problemNode.data)
+            return a.problemNode.data.length < b.problemNode.data.length ? -1 : 1;
+        else if (a.problemNode.data)
+            return 1;
+        else if (b.problemNode.data)
+            return -1;
+        else
+            return -1;
+    });
+
+    var listProblem = {};
+    var count =0;
+    data3.forEach(function(d,i){
+        if (d.problemNode.name==undefined) {
+            if (listProblem["undefined"]==undefined) {
+                listProblem["undefined"] = {};
+                listProblem["undefined"].references =[];
+            }
+            listProblem["undefined"].references.push(d);
+            listProblem["undefined"].order = count;
+            d.vulnerability_type = count;
+        }
+        else if (listProblem[d.problemNode.name]==undefined){
+            listProblem[d.problemNode.name] = {};
+            listProblem[d.problemNode.name].references =[];
+            listProblem[d.problemNode.name].references.push(d);
+            count++;
+            listProblem[d.problemNode.name].order = count;
+            d.vulnerability_type = count;
+        }
+        else{
+            listProblem[d.problemNode.name].references.push(d);
+            d.vulnerability_type = listProblem[d.problemNode.name].order ;
+        }
+    });
+
+debugger;
 
 
     // Extract the list of numerical dimensions and create a scale for each.
@@ -209,7 +328,7 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
         .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
         .append("svg:text")
         .attr("text-anchor", "middle")
-        .attr("y", function(d,i) { return i%2 == 0 ? -14 : -30 } )
+        .attr("y", -14 )
         .attr("x", 0)
         .attr("class", "label")
         .text(String)
