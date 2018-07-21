@@ -2,23 +2,22 @@
 // Also referenced to the implementation: by Jason Davies, https://www.jasondavies.com/wordcloud/
 d3.layout.wordStream = function(){
     var data = [],
-        size = [1200, 500],
-        maxFontSize = 24,
-        minFontSize = 4,
+        size = [],
+        maxFontSize= null,
+        minFontSize = null,
         font = "Impact",
         fontScale = d3.scale.linear(),
         frequencyScale = d3.scale.linear(),
         spiral = achemedeanSpiral,
         canvas = cloudCanvas,
-        interpolation = "cardinal";
+        interpolation = "basis";
     var wordStream = {};
-    
+
     var cloudRadians = Math.PI / 180,
-    cw = 1 << 11,
-    ch = 1 << 11;
+    cw = 1 << 12,
+    ch = 1 << 12;
 
     wordStream.boxes = function(){
-        var boxWidth = size[0]/data.length;
         buildFontScale(data);
         buildFrequencyScale(data);
         var boxes = buildBoxes(data);
@@ -29,42 +28,41 @@ d3.layout.wordStream = function(){
             var topic = boxes.topics[tc];
             var board = buildBoard(boxes, topic);
             var innerBoxes = boxes.innerBoxes[topic];
-            var layer = boxes.layers[tc];
             //Place
             for(var bc = 0; bc < boxes.data.length; bc++){
-                var words = boxes.data[bc].words[topic];
-                var n = words.length;
-                var innerBox = innerBoxes[bc];
-                board.boxWidth = innerBox.width;
-                board.boxHeight = innerBox.height;
-                board.boxX = innerBox.x;
-                board.boxY = innerBox.y;
-                for(var i = 0; i < n; i++){
-                    place(words[i], board);
+                if(boxes.data[bc].topics[topic]){
+                    var words = boxes.data[bc].topics[topic].text;
+                    var n = words.length;
+                    var innerBox = innerBoxes[bc];
+                    board.boxWidth = innerBox.width;
+                    board.boxHeight = innerBox.height;
+                    board.boxX = innerBox.x;
+                    board.boxY = innerBox.y;
+                    for(var i = 0; i < n; i++){
+                        place(words[i], board);
+                    }
                 }
+
             }
-            // if(tc==0){
-            //     return board;
-            // }
         }
         return boxes;
     };
-    
+
     //#region helper functions
     function buildFontScale(data){
-        
-        var topics = d3.keys(data[0].words);
+        var topics = d3.keys(data[0].topics);
         //#region scale for the font size.
         var maxFrequency = 0;
         var minFrequency = Number.MAX_SAFE_INTEGER;
         d3.map(data, function(box){
             d3.map(topics, function(topic){
-                var max = d3.max(box.words[topic], function(d){
+
+                var max = box.topics[topic]?d3.max(box.topics[topic].text, function(d){
                     return d.frequency;
-                });
-                var min = d3.min(box.words[topic], function(d){
+                }):0;
+                var min = box.topics[topic]?d3.min(box.topics[topic].text, function(d){
                     return d.frequency;
-                });
+                }):0;
                 if(maxFrequency < max) maxFrequency = max;
                 if(minFrequency > min) minFrequency = min;
             })
@@ -72,16 +70,7 @@ d3.layout.wordStream = function(){
         fontScale.domain([minFrequency, maxFrequency]).range([minFontSize, maxFontSize]);
     }
     function buildFrequencyScale(data){
-        var totalFrequencies  = calculateTotalFrequenciesABox(data);
-        var max = 0;
-        d3.map(totalFrequencies, function(d){
-            var keys = d3.keys(totalFrequencies[0]);
-            var total = 0;
-            keys.forEach(key=>{
-                total += d[key];
-            });
-            if(total > max) max = total;
-        });
+        let max = d3.max(data.map(d=>d.totalFrequencies));
         frequencyScale = d3.scale.linear()
         .domain([0, max])
         .range([0, size[1]]);
@@ -89,8 +78,8 @@ d3.layout.wordStream = function(){
     //Convert from data to box
     function buildBoxes(data){
         //Build settings based on frequencies
-        var totalFrequencies  = calculateTotalFrequenciesABox(data);
-        var topics = d3.keys(data[0].words);
+        var totalFrequencies  = calculateTotalFrequenciesABox(data)
+        var topics = d3.keys(data[0].topics);
         //#region creating boxes
         var numberOfBoxes = data.length;
         var boxes = {};
@@ -108,7 +97,7 @@ d3.layout.wordStream = function(){
             dataPerTopic.push({x: size[0], y:totalFrequencies[totalFrequencies.length-1][topic]});
             allPoints.push(dataPerTopic);
         });
-        var layers = d3.layout.stack().offset('wiggle')(allPoints);
+        var layers = d3.layout.stack().offset('silhouette')(allPoints);
         //Process the scale of each box here.
         layers.forEach(layer=>{
             layer.forEach(point=>{
@@ -142,7 +131,7 @@ d3.layout.wordStream = function(){
             maxDelta = ~~Math.sqrt((board.boxWidth*board.boxWidth) + (board.boxHeight*board.boxHeight)),
             startX =  ~~(board.boxX + (board.boxWidth*( Math.random() + .5) >> 1)),
             startY =  ~~(board.boxY + (board.boxHeight*( Math.random() + .5) >> 1)),
-            s = spiral([board.boxWidth, board.boxHeight]), 
+            s = spiral([board.boxWidth, board.boxHeight]),
             dt = Math.random() < .5 ? 1 : -1,
             t = -dt,
             dxdy, dx, dy;
@@ -182,12 +171,12 @@ d3.layout.wordStream = function(){
 
                 var bsi = (j+word.y+word.y0)*bw + i+(word.x + word.x0);//board sprite index
                 var boardPixel = board.sprite[bsi];
-                
+
                 if(boardPixel!=0 && wordPixel!=0){
                     return true;
                 }
             }
-        } 
+        }
         return false;
     }
     function placeWordToBoard(word, board){
@@ -216,19 +205,18 @@ d3.layout.wordStream = function(){
             height: height
         });
         var graphGroup = svg.append('g');
-        var n = boxes.length;
-        
+
         var catIndex = boxes.topics.indexOf(topic);
-        
+
         var area1 = d3.svg.area()
         .interpolate(interpolation)
         .x(function(d){return d.x; })
         .y0(0)
         .y1(function(d){return d.y0; });
-        
+
 
         var area2 = d3.svg.area()
-        .interpolate('cardinal')
+        .interpolate(interpolation)
         .x(function(d){return d.x; })
         .y0(function(d){return (d.y + d.y0); })
         .y1(height);
@@ -305,90 +293,94 @@ d3.layout.wordStream = function(){
             maxh = 0;
         for(var i = 0; i < data.length; i++){
             boxes.topics.forEach(topic =>{
-                var words = data[i].words[topic];
-                var n = words.length;
-                var di=-1;
-                var d = {};
-                while (++di < n) {
-                    d = words[di];
-                    c.save();
-                    d.fontSize = ~~fontScale(d.frequency);
-                    d.rotate = (~~(Math.random() * 6) - 3) * 30;
-                    c.font = ~~(d.fontSize + 1) + "px " + font;
-                    
-                    var w = ~~(c.measureText(d.text).width),
-                        h = d.fontSize;
-                    if (d.rotate) {
-                      var sr = Math.sin(d.rotate * cloudRadians),
-                          cr = Math.cos(d.rotate * cloudRadians),
-                          wcr = w * cr,
-                          wsr = w * sr,
-                          hcr = h * cr,
-                          hsr = h * sr;
-                      w = ~~Math.max(Math.abs(wcr + hsr), Math.abs(wcr - hsr));
-                      h = ~~Math.max(Math.abs(wsr + hcr), Math.abs(wsr - hcr));
-                    } 
-                    if (h > maxh) maxh = h;
-                    if (x + w >= cw) {
-                      x = 0;
-                      y += maxh;
-                      maxh = 0;
+                if(data[i].topics[topic]){
+                    var words = data[i].topics[topic].text;
+                    var n = words.length;
+                    var di=-1;
+                    var d = {};
+                    while (++di < n) {
+                        d = words[di];
+                        c.save();
+                        d.fontSize = ~~fontScale(d.frequency);
+                        d.rotate = (~~(Math.random() * 6) - 3) * rotateCorner;
+                        c.font = ~~(d.fontSize + 1) + "px " + font;
+
+                        var w = ~~(c.measureText(d.text).width),
+                            h = d.fontSize;
+                        if (d.rotate) {
+                            var sr = Math.sin(d.rotate * cloudRadians),
+                                cr = Math.cos(d.rotate * cloudRadians),
+                                wcr = w * cr,
+                                wsr = w * sr,
+                                hcr = h * cr,
+                                hsr = h * sr;
+                            w = ~~Math.max(Math.abs(wcr + hsr), Math.abs(wcr - hsr));
+                            h = ~~Math.max(Math.abs(wsr + hcr), Math.abs(wsr - hcr));
+                        }
+                        if (h > maxh) maxh = h;
+                        if (x + w >= cw) {
+                            x = 0;
+                            y += maxh;
+                            maxh = 0;
+                        }
+                        if (y + h >= ch) break;
+                        c.translate((x + (w >> 1)) , (y + (h >> 1)));
+                        if (d.rotate) c.rotate(d.rotate * cloudRadians);
+                        c.fillText(d.text, 0, 0);
+                        if (d.padding) c.lineWidth = 2 * d.padding, c.strokeText(d.text, 0, 0);
+                        c.restore();
+
+                        d.width = w;
+                        d.height = h;
+                        d.x = x;
+                        d.y = y;
+                        d.x1 = w>>1;
+                        d.y1 = h>>1;
+                        d.x0 = -d.x1;
+                        d.y0 = -d.y1;
+                        d.timeStep = i;
+                        d.streamHeight = frequencyScale(d.frequency);
+                        x += w;
                     }
-                    if (y + h >= ch) break;
-                    c.translate((x + (w >> 1)) , (y + (h >> 1)));
-                    if (d.rotate) c.rotate(d.rotate * cloudRadians);
-                    c.fillText(d.text, 0, 0);
-                    if (d.padding) c.lineWidth = 2 * d.padding, c.strokeText(d.text, 0, 0);
-                    c.restore();
-                    
-                    d.width = w;
-                    d.height = h;
-                    d.x = x;
-                    d.y = y;
-                    d.x1 = w>>1;
-                    d.y1 = h>>1;
-                    d.x0 = -d.x1;
-                    d.y0 = -d.y1;
-                    d.timeStep = i;
-                    d.streamHeight = frequencyScale(d.frequency);
-                    x += w;
-                }     
+                }
             });
         }
         for(var bc = 0; bc < data.length; bc++){
             boxes.topics.forEach(topic=>{
-                var words = data[bc].words[topic];
-                var n = words.length;
-                var di=-1;
-                var d = {};
-                while (++di < n) {
-                    d = words[di];
-                    var w = d.width,
-                        h = d.height,
-                        x = d.x,
-                        y = d.y;
-                    
+                if(data[bc].topics[topic]){
+                    var words = data[bc].topics[topic].text;
+                    var n = words.length;
+                    var di=-1;
+                    var d = {};
+                    while (++di < n) {
+                        d = words[di];
+                        var w = d.width,
+                            h = d.height,
+                            x = d.x,
+                            y = d.y;
+
                         var pixels = c.getImageData(d.x, d.y, d.width, d.height).data;
                         d.sprite = Array();
                         for(var i = 0; i<<2 < pixels.length; i++){
                             d.sprite.push(pixels[i<<2]);
                         }
-                } 
+                    }
+                }
             });
         }
         //Only return this to test if needed
         return c.getImageData(0, 0, cw, ch);
     }
     function calculateTotalFrequenciesABox(data){
-        var topics = d3.keys(data[0].words);
+        var topics = d3.keys(data[0].topics);
         var totalFrequenciesABox = Array();
         d3.map(data, function(row){
             var aBox = {};
             topics.forEach(topic =>{
                 var totalFrequency = 0;
-                row.words[topic].forEach(element => {
-                    totalFrequency += element.frequency;
-                });
+                if(row.topics[topic]){
+                    totalFrequency = row.topics[topic].frequency;
+                }
                 aBox[topic] = totalFrequency;
             });
             totalFrequenciesABox.push(aBox);

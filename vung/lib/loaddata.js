@@ -1,120 +1,233 @@
-function loadBlogPostData(draw){
-    var topics = [];
-    d3.tsv(fileName, function(error, rawData) {
+let dateType = 'publishedDate';//can be 'lastModifiedDate'
+let impactScore = 'impactScore';//can be 'baseScore', 'exploitabilityScore'
+let baseScore = 'baseScore';
+let exploitabilityScore = 'exploitabilityScore';
+let baseMetric = 'baseMetricV3';//can be 'baseMetricV2'
+let cvssVersion = 'cvss' + baseMetric.substr(baseMetric.length - 2, 2);
+let wordAccessChain = ["cve", "description", "description_data"];
+let vendorAccessChain = ["cve", "affects", "vendor", "vendor_data"];
+let impactScoreAccessChain = ['impact', baseMetric, impactScore];
+let exploitabilityScoreAccessChain = ['impact', baseMetric, exploitabilityScore];
+let baseScoreAccessChain = ['impact', baseMetric, cvssVersion, baseScore];
+let baseSeverity = "baseSeverity";
+let baseSeverityAccessChain = ['impact', baseMetric, cvssVersion, baseSeverity];
+function getOverallScore(d) {
+    let is = accessChain(d, impactScoreAccessChain);
+    let es = accessChain(d, exploitabilityScoreAccessChain);
+    let bs = accessChain(d, baseScoreAccessChain);
+    return d3.max([is, es, bs]);
+}
+
+let scores = {
+    "0-1": [-1, 1],//-1 here since for 0 we would like it to belong to this range too.
+    "1-2": [1, 2],
+    "2-3": [2, 3],
+    "3-4": [3, 4],
+    "4-5": [4, 5],
+    "5-6": [5, 6],
+    "6-7": [6, 7],
+    "7-8": [7, 8],
+    "8-9": [8, 9],
+    "9-10": [9, 10]
+};
+let criticalOrder = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+let stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"];
+let removeWords = ["object", "Object", "", " "];
+stopWords = stopWords.concat(removeWords);
+function removeStopWords(words, stopWords) {
+    let result = [];
+    words.forEach(w => {
+        if (stopWords.indexOf(w.toLowerCase()) < 0) {
+            result.push(w);
+        }
+    });
+    return result;
+}
+
+function loadDescriptionData(draw) {
+    let topics = d3.keys(scores);
+    d3.json(fileName, function (error, rawData) {
         if (error) throw error;
-        var inputFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
-        var outputFormat = d3.time.format('%b %Y');
-        topics = categories;
-        //Filter and take only dates in 2013
-        rawData = rawData.filter(function(d){
-            var time = Date.parse(d.time);
-            var startDate =  inputFormat.parse('2013-01-01T00:00:00');
-            var endDate = inputFormat.parse('2013-07-01T00:00:00');
-            //2011 for CrooksAndLiars
-            if(fileName.indexOf("Liars")>=0){
-                startDate = inputFormat.parse('2010-01-01T00:00:00');
-                endDate = inputFormat.parse('2010-07-01T00:00:00');
-            }
-            return      time  >= startDate && time < endDate; 
+        //Filter data in a year
+
+        let monthFormat = d3.time.format('%b %Y');
+        let cves = rawData['CVE_Items'];
+        let year1 = new Date(year + '-01-01T00:00Z');
+        let year2 = new Date((year + 1) + '-01-01T00:00Z');
+        cves = cves.filter(d => {
+            let date = new Date(d[dateType]);
+            return (date >= year1) && (date < year2);
         });
-        var data = {};
-        d3.map(rawData, function(d, i){
-            var date = Date.parse(d.time);
-            date = outputFormat(new Date(date));
-            topics.forEach(topic => {
-                if(!data[date]) data[date] = {};
-                data[date][topic] = data[date][topic] ? (data[date][topic] + '|' +d[topic]): (d[topic]); 
+        var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
+        data = data.map(d => {
+            d.date = d.key;
+            d.totalFrequencies = d.values.length;
+            let nestedTopics = d3.nest().key(d => scoreScale(getOverallScore(d))).entries(d.values);
+            let topics = nestedTopics.map(d => {
+                let frequency = d.values.length;
+                let key = d.key;
+
+                let text = "";
+                d.values.forEach(d => {
+                    let descriptions = accessChain(d, wordAccessChain);
+                    descriptions = descriptions.map(d => d.value);
+                    text += ' ' + descriptions.join(' ');
+                    let parts = text.split(/[ '\-\(\)\*":;\[\]|{},.!?]+/);
+                    //Remove stop words
+                    parts = removeStopWords(parts, stopWords);
+                    //Count word frequencies
+                    var counts = parts.reduce(function (obj, word) {
+                        if (!obj[word]) {
+                            obj[word] = 0;
+                        }
+                        obj[word]++;
+                        return obj;
+                    }, {});
+                    //Convert to array of objects
+                    text = d3.keys(counts).map(function (d) {
+                        return {
+                            text: d,
+                            frequency: counts[d],
+                            topic: key
+                        }
+                    }).sort(function (a, b) {//sort the terms by frequency
+                        return b.frequency - a.frequency;
+                    }).filter(function (d) {
+                        return d.text;
+                    });//filter out empty words
+                    text = text.slice(0, Math.min(text.length, 45));
+                });
+                d[d.key] = {
+                    text: text,
+                    frequency: frequency
+                };
+                delete d.key;
+                delete d.values;
+                return d;
             });
-        });
-        var data = d3.keys(data).map(function(date, i){
-            var words = {};
+
+            d.topics = {};
+            topics.sort((a, b) => {
+                let topicA = d3.keys(a)[0];
+                let topicB = d3.keys(b)[0];
+                return topicA.localeCompare(topicB);
+            });
             topics.forEach(topic => {
-                var raw = {};
-                raw[topic] = data[date][topic].split('|');
-                //Count word frequencies
-                var counts = raw[topic].reduce(function(obj, word){
-                    if(!obj[word]){
+                for (let key in topic) {
+                    d.topics[key] = topic[key];
+                }
+            });
+            delete d.values;
+            delete d.key;
+            return d;
+        }).sort(function (a, b) {//sort by date
+            return monthFormat.parse(a.date) - monthFormat.parse(b.date);
+        });
+        draw(data);
+    });
+}
+
+function loadVendorData(draw) {
+    let topics = d3.keys(scores);
+    d3.json(fileName, function (error, rawData) {
+        if (error) throw error;
+        //Filter data in a year
+
+        let monthFormat = d3.time.format('%b %Y');
+        let cves = rawData['CVE_Items'];
+        let year1 = new Date(year + '-01-01T00:00Z');
+        let year2 = new Date((year + 1) + '-01-01T00:00Z');
+        //Filter by date
+        cves = cves.filter(d => {
+            let date = new Date(d[dateType]);
+            return (date >= year1) && (date < year2);
+        });
+        var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
+        data = data.map(d => {
+            d.date = d.key;
+            d.totalFrequencies = d.values.length;
+            let nestedTopics = d3.nest().key(d => accessChain(d, baseSeverityAccessChain)).entries(d.values);
+            //Filter the null key
+            nestedTopics = nestedTopics.filter(d=>d.key!=='null');
+            let topics = nestedTopics.map(d => {
+                let frequency = d.values.length;
+                let key = d.key;
+                let text = [];
+                let vendors = [];
+                d.values.forEach(d => {
+                    let vds = accessChain(d, vendorAccessChain);
+                    vendors = vendors.concat(vds.map(d => d["vendor_name"]));
+                });
+                //Count frequencies
+                var counts = vendors.reduce(function (obj, word) {
+                    if (!obj[word]) {
                         obj[word] = 0;
                     }
                     obj[word]++;
                     return obj;
                 }, {});
                 //Convert to array of objects
-                words[topic] = d3.keys(counts).map(function(d){
-                    return{
+                text = d3.keys(counts).map(function (d) {
+                    return {
                         text: d,
                         frequency: counts[d],
-                        topic: topic
+                        topic: key
                     }
-                }).sort(function(a, b){//sort the terms by frequency
-                    return b.frequency-a.frequency;
-                }).filter(function(d){return d.text; });//filter out empty words
-                words[topic] = words[topic].slice(0, Math.min(words[topic].length, 45));
+                }).sort(function (a, b) {//sort the terms by frequency
+                    return b.frequency - a.frequency;
+                }).filter(function (d) {
+                    return d.text;
+                });//filter out empty words
+                text = text.slice(0, Math.min(text.length, 45));
+
+                d[d.key] = {
+                    text: text,
+                    frequency: frequency
+                };
+                delete d.key;
+                delete d.values;
+                return d;
             });
-            return {
-                date: date,
-                words: words
-            }
-        }).sort(function(a, b){//sort by date
-            return outputFormat.parse(a.date) - outputFormat.parse(b.date);
+
+            d.topics = {};
+            topics.sort((a, b) => {
+                let topicA = d3.keys(a)[0];
+                let topicB = d3.keys(b)[0];
+                return criticalOrder.indexOf(topicB) - criticalOrder.indexOf(topicA);
+            });
+
+            topics.forEach(topic => {
+                for (let key in topic) {
+                    d.topics[key] = topic[key];
+                }
+            });
+            delete d.values;
+            delete d.key;
+            return d;
+        }).sort(function (a, b) {//sort by date
+            return monthFormat.parse(a.date) - monthFormat.parse(b.date);
         });
         draw(data);
     });
 }
-function loadAuthorData(draw){
-    var topics = categories;
-    d3.tsv(fileName, function(error, rawData) {
-        if (error) throw error;
-        //Filter
-        var startYear = 2011;
-        var endYear = 2016;
-        if(fileName.indexOf("PopCha")>=0 || fileName.indexOf("Cards_Fries")>=0 || fileName.indexOf("Cards_PC")>=0){
-            startYear = 2007;
-            endYear = 2013;
+
+function accessChain(obj, chain) {
+    let result = obj;
+    for (let i = 0; i < chain.length; i++) {
+        if (!result) {
+            return null;
         }
-        rawData = rawData.filter(d=>{
-            return d.Year >= startYear && d.Year <= endYear;
-        });
-        var data={};
-        d3.map(rawData, function(d, i){
-            var year = +d["Year"];
-            var topic = d["Conference"];
-            if(!data[year]) data[year] = {};
-            data[year][topic] = (data[year][topic]) ? ((data[year][topic])+";" + d["Author Names"]): (d["Author Names"]);
-        });
-        var data = d3.keys(data).map(function(year, i){
-            var words = {};
-            topics.forEach(topic => {
-                var raw = {};
-                if(!data[year][topic]) data[year][topic] = "";
-                raw[topic] = data[year][topic].split(";");
-                //Count word frequencies
-                var counts = raw[topic].reduce(function(obj, word){
-                        if(!obj[word]){
-                            obj[word] = 0;
-                        }
-                        obj[word]++;
-                        return obj;
-                }, {});
-                //Convert to array of objects
-                words[topic] = d3.keys(counts).map(function(d){
-                    return{
-                        text: d,
-                        frequency: counts[d],
-                        topic: topic
-                    }
-                }).sort(function(a, b){//sort the terms by frequency
-                    return b.frequency-a.frequency;
-                }).filter(function(d){return d.text; })//filter out empty words
-                .slice(0, 45);
-            });
-            return {
-                date: year,
-                words: words
-            }
-        }).sort(function(a, b){//sort by date
-            return a.date - b.date;
-        });
-        draw(data);
-    });
+        result = result[chain[i]];
+    }
+    return result;
+}
+
+function scoreScale(score) {
+    let keys = d3.keys(scores)
+    for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        if (score > scores[key][0] && score <= scores[key][1]) {
+            return key;
+        }
+    }
 }

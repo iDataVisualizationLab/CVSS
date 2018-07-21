@@ -1,33 +1,42 @@
-var width = 800, height = 500;
+var width = 1200, height = 600;
+var interpolation = "basis";
+var placed = true;
+let maxFontSize = 24;
+let minFontSize = 4;
+let rotateCorner = 15;
 var svg = d3.select("body").append('svg').attr({
     width: width,
     height: height,
     id: "mainsvg"
 });
-// var fileList = ["WikiNews","Huffington","CrooksAndLiars","EmptyWheel","Esquire","FactCheck"
-//                 ,"VIS_papers","IMDB","PopCha","Cards_PC","Cards_Fries"]
 
-var fileList = ["WikiNews", "Huffington", "CrooksAndLiars", "EmptyWheel","Esquire","FactCheck", "VIS_papers", "IMDB","PopCha","Cards_PC","Cards_Fries"]
+var years = d3.range(2002, 2019, 1);
 
 var initialDataset = "EmptyWheel";
-var categories = ["person","location","organization","miscellaneous"];
-
+var categories = [];
 var fileName;
+let year = 2018;
+//fileName = document.getElementById("datasetsSelect").value;
+// fileName = "nvdcve-1.0-2016";
+// fileName = "nvdcve-1.0-2017";
+fileName = "nvdcve-1.0-2018-1";
+// fileName = "nvdcve-1.0-2018";
 
-
-addDatasetsOptions();
-function addDatasetsOptions() {
-    var select = document.getElementById("datasetsSelect");   
-    for(var i = 0; i < fileList.length; i++) {
-        var opt = fileList[i];
+function addOptions(controlId, values){
+    var select = document.getElementById(controlId);
+    for(var i = 0; i < values.length; i++) {
+        var opt = values[i];
         var el = document.createElement("option");
         el.textContent = opt;
         el.value = opt;
-        el["data-image"]="images2/datasetThumnails/"+fileList[i]+".png";
         select.appendChild(el);
-    }        
-    document.getElementById('datasetsSelect').value = initialDataset;  //************************************************
-    fileName = document.getElementById("datasetsSelect").value;
+        // document.getElementById('datasetsSelect').value = initialDataset;
+    }
+}
+
+addDatasetsOptions();
+function addDatasetsOptions() {
+      //************************************************
     loadData();
 }
 var spinner;
@@ -46,31 +55,8 @@ function loadData(){
     var target = document.getElementById('loadingSpinner');
     spinner = new Spinner(opts).spin(target);
     // END: loader spinner settings ****************************
-    fileName = "data/"+fileName+".tsv"; // Add data folder path
-    if (fileName.indexOf("Cards_Fries")>=0){
-        categories = ["increases_activity", "decreases_activity"];
-        loadAuthorData(draw);
-    }
-    else if (fileName.indexOf("Cards_PC")>=0){
-        categories = ["adds_modification", "removes_modification", "increases","decreases", "binds", "translocation"];
-        loadAuthorData(draw);
-    }
-    else if (fileName.indexOf("PopCha")>=0){
-        categories = ["Comedy","Drama","Action", "Fantasy", "Horror"];
-        loadAuthorData(draw);
-    }
-    else if (fileName.indexOf("IMDB")>=0){
-        categories = ["Comedy","Drama","Action", "Family"];
-        loadAuthorData(draw);
-    }
-    else if (fileName.indexOf("VIS")>=0){
-        categories = categories = ["Vis","VAST","InfoVis","SciVis"];
-        loadAuthorData(draw);
-    }
-    else{
-        categories = ["person","location","organization","miscellaneous"];
-        loadBlogPostData(draw);
-    } 
+    fileName = "../data/"+fileName+".json"; // Add data folder path
+    loadVendorData(draw);
 }
 function loadNewData(event) {
     svg.selectAll("*").remove();
@@ -80,7 +66,6 @@ function loadNewData(event) {
 
 function draw(data){
     //Layout data
-    var interpolation = "cardinal";
     var axisPadding = 10;
     var margins = {left: 20, top: 20, right: 10, bottom: 30};
     var ws = d3.layout.wordStream()
@@ -88,8 +73,8 @@ function draw(data){
     .interpolate(interpolation)
     //.fontScale(d3.scale.pow().exponent(2))
     .fontScale(d3.scale.linear())
-    .minFontSize(4)
-    .maxFontSize(36)
+    .minFontSize(minFontSize)
+    .maxFontSize(maxFontSize)
     .data(data);
     var boxes = ws.boxes();
     
@@ -147,7 +132,9 @@ function draw(data){
     var allWords = [];
     d3.map(boxes.data, function(row){
         boxes.topics.forEach(topic=>{
-            allWords = allWords.concat(row.words[topic]);
+            if(row.topics[topic]){
+                allWords = allWords.concat(row.topics[topic].text);
+            }
         });
     });
     var c20 = d3.scale.category20b();
@@ -155,14 +142,13 @@ function draw(data){
     var topicColorMap = d3.scale.ordinal().domain(topics).range(c20.range());
     //Color based on term
     var terms = [];
-    for(i=0; i< allWords.length; i++){
+    for(let i=0; i< allWords.length; i++){
         terms.concat(allWords[i].text);
     }
     var uniqueTerms = d3.set(terms).values();
     var termColorMap = d3.scale.ordinal()
         .domain(uniqueTerms)
         .range(c20.range());
-    var placed = true;
     mainGroup.selectAll('g').data(allWords).enter().append('g')
     .attr({
         transform: function(d){return 'translate('+d.x+', '+d.y+')rotate('+d.rotate+')';}
