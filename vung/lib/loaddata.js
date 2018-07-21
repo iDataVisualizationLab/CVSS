@@ -49,7 +49,8 @@ function removeStopWords(words, stopWords) {
 let extractors={
     'vendors': vendorExtractor,
     'problemTypes': problemTypeExtractor,
-    'descriptions': descriptionExtractor
+    'descriptions': descriptionExtractor,
+    'products': productExtractor
 }
 function descriptionExtractor(d){
     let values = d.values;
@@ -88,7 +89,15 @@ function vendorExtractor(d) {
     return vendors;
 }
 function productExtractor(d){
-
+    let products = [];
+    let vendors = [];
+    d.values.forEach(cve=>{
+        vendors = vendors.concat(accessChain(cve, vendorAccessChain));
+    });
+    vendors.forEach(vd=>{
+       products = products.concat(vd['product']['product_data'].map(pd=>pd['product_name']));
+    });
+    return products;
 }
 function loadCloudData(viewOption, draw) {
     let topics = d3.keys(scores);
