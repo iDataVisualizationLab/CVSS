@@ -6,13 +6,13 @@
     <link rel="icon" type="image/gif"
           href="images/fav.gif" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <title>CVExplorer</title>
+    <title>CVSS Explorer</title>
     <link rel="stylesheet" type="text/css" href="styles/parallel.css" />
     <link rel="stylesheet" type="text/css" href="styles/main.css" />
 </head>
 <body>
 <div id="header">
-    <h1>CVExplorer</h1>
+    <h1>CVSS Explorer</h1>
     <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
     <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
     <button title="Export data as CSV" id="export-data">Export</button>
@@ -39,6 +39,7 @@
 
 
 
+
 <div id="wrap">
     <div class="quarter" id="controls">
         <h3>CVE Groups</h3>
@@ -49,10 +50,10 @@
             <h3>What is this?</h3>
             <p>
                 The parallel coordinates displays CVSS v3.0 on 3 main scores. Each CVE Entry is a polyline.
-           <br>
+                <br>
                 <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read this tutorial.</a>
             </p>
-         </div>
+        </div>
 
         <div class="little-box">
             <h3>Controls</h3>
@@ -76,7 +77,7 @@
     </div>
 
     <div  class="half">
-       
+
         <div id="chart2"></div>
     </div>
 </div>
@@ -87,15 +88,13 @@
 </div>
 
 
-
 </body>
-<!--<script src="javascripts/d3.v3.min.js"></script> -->
 <script src="javascripts/d3.v2.js"></script>
 <script src="https://underscorejs.org/underscore.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="myscripts/cloud.js"></script>
 <script src="myscripts/parallel.js"></script>
 
-
 <script src="myscripts/network.js"></script>
+
 </html>

@@ -90,23 +90,14 @@ var svg = d3.select("svg")
     .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
 // Load the data and visualization
-//d3.csv("data/nutrients.csv", function(raw_data) {
+//d3.json("data2/nvdcve-1.0-2014.json", function(raw_data) {      // 2014 -> 653 CVEs
+//d3.json("data2/nvdcve-1.0-2016.json", function(raw_data) {
+//d3.json("data2/nvdcve-1.0-2017.json", function(raw_data) {
 d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
-    // Convert quantitative scales to floats
-   /* data = raw_data.map(function(d) {
-        for (var k in d) {
-            if (!_.isNaN(raw_data[0][k] - 0) && k != 'id') {
-                d[k] = parseFloat(d[k]) || 0;
-            }
-        };
-        return d;
-    });*/
-
 
    // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
    // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
-   // debugger;
-//    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
+    //    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
 
 
    data =[];
@@ -132,7 +123,7 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
     }
 
     // network *************************************************************************************************
-    colaNetwork();
+    processNetwork();
 
     // Compute vendor order for Parallel Coordinates *****************************************************************************
     var data2 =[];
@@ -254,8 +245,6 @@ d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
             d.vulnerability_type = listProblem[d.problemNode.name].order ;
         }
     });
-
-debugger;
 
 
     // Extract the list of numerical dimensions and create a scale for each.
@@ -379,12 +368,15 @@ function grayscale(pixels, args) {
     return pixels;
 };
 
+
+
 function create_legend(colors,brush) {
     // create legend
     var legend_data = d3.select("#legend")
         .html("")
         .selectAll(".row")
-        .data( _.keys(colors).sort() )
+        .data( _.keys(colors) )
+   // debugger;
 
     // filter by group
     var legend = legend_data
@@ -512,23 +504,6 @@ function invert_axis(d) {
     return extent;
 }
 
-// Draw a single polyline
-/*
- function path(d, ctx, color) {
- if (color) ctx.strokeStyle = color;
- var x = xscale(0)-15;
- y = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
- ctx.beginPath();
- ctx.moveTo(x,y);
- dimensions.map(function(p,i) {
- x = xscale(p),
- y = yscale[p](d[p]);
- ctx.lineTo(x, y);
- });
- ctx.lineTo(x+15, y);                               // right edge
- ctx.stroke();
- }
- */
 
 function path(d, ctx, color) {
     if (color) ctx.strokeStyle = color;
@@ -651,17 +626,16 @@ function brush() {
     legend.selectAll(".tally")
         .text(function(d,i) { return tallies[d].length });
 
-    // Tommy 2018, Word Cloud
+    // Tommy 2018, Word Cloud  **************************************
     var text_string = "";
     for (var i=0; i<selected.length;i++){
         text_string += selected[i].name +" ";
     }
-
     drawWordCloud(text_string);
 
-
-
-    
+    // Tommy 2018, NETWORK     **************************************
+    processNetwork(selected);
+    drawNetwork();
 
     // Render selected lines
     paths(selected, foreground, brush_count, true);
