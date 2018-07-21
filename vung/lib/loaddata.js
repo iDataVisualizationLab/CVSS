@@ -150,7 +150,7 @@ function searchCVEs(month, baseSeverity, type, term){
         let date = monthFormat(new Date(cve[dateType]));
         let dateCondition = date===month;
         //baseSeverity condition
-        let cveBaseSeverity = accessChain(cve, baseSeverityAccessChain);
+        let cveBaseSeverity = baseSeverityExtractor(cve, baseSeverityAccessChain);
         let baseSeverityCondition = cveBaseSeverity === baseSeverity;
 
         //take all terms for the type
@@ -161,6 +161,11 @@ function searchCVEs(month, baseSeverity, type, term){
     });
     return filteredCVEs;
 }
+
+function baseSeverityExtractor(d) {
+    return accessChain(d, baseSeverityAccessChain) ? accessChain(d, baseSeverityAccessChain) : accessChain(d, baseSeverityAccessChainV2);
+}
+
 function loadCloudData(viewOption, draw) {
     let topics = d3.keys(scores);
     d3.json(fileName, function (error, rawData) {
@@ -179,7 +184,7 @@ function loadCloudData(viewOption, draw) {
         data = data.map(d => {
             d.date = d.key;
             d.totalFrequencies = d.values.length;
-            let nestedTopics = d3.nest().key(d => accessChain(d, baseSeverityAccessChain)?accessChain(d, baseSeverityAccessChain): accessChain(d, baseSeverityAccessChainV2)).entries(d.values);
+            let nestedTopics = d3.nest().key(d => baseSeverityExtractor(d)).entries(d.values);
             //Filter the null key
             nestedTopics = nestedTopics.filter(d=>d.key!=='null');
             let topics = nestedTopics.map(d => {
