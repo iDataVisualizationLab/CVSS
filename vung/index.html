@@ -8,20 +8,9 @@
     <script src="./lib/loaddata.js"></script>
     <script src="./lib/d3.layout.wordstream.js"></script>
     <script src="javascripts/jquery/jquery-1.9.0.min.js"></script>
-    <script src="javascripts/msdropdown/jquery.dd.js"></script>
-    <script src="javascripts/msdropdown/select.js"></script>
-    <link rel="stylesheet" type="text/css" href="styles/msdropdown/dd.css"/>
     <link rel="stylesheet" type="text/css" href="styles/main.css" media="screen"/>
-
     <script src="lib/json-viewer/jquery.json-viewer.js"></script>
     <link href="lib/json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet"/>
-    <style type="text/css">
-        pre#json-renderer {
-            border: 1px solid #aaa;
-            padding: 0.5em 1.5em;
-            font-family: sans-serif;
-        }
-    </style>
 
 </head>
 <body>
@@ -31,9 +20,9 @@
 <div id="holder1" class="holder1">
     <select id="viewTypeSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select>
 </div>
-
+<div id="theCloud"></div>
 <div id="jsviewer" style="visibility: hidden;position: absolute;">
-    <pre id="json-renderer"></pre>
+    <pre id="json-renderer" style=" border: 1px solid #aaa; padding: 0.5em 1.5em; font-family: sans-serif;"></pre>
 </div>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script> <!-- Spinner when loading -->
