@@ -90,17 +90,10 @@ var svg = d3.select("#parallelSVG")
     .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
 // Load the data and visualization
-<<<<<<< HEAD
 d3.json("data2/nvdcve-1.0-2014.json", function(raw_data) {      // 2014 -> 653 CVEs
 //d3.json("data2/nvdcve-1.0-2016.json", function(raw_data) {
 //d3.json("../data2/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 //d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
-=======
-d3.json("data/nvdcve-1.0-2014.json", function(raw_data) {      // 2014 -> 653 CVEs
-// d3.json("data/nvdcve-1.0-2016.json", function(raw_data) {
-// d3.json("data2/nvdcve-1.0-2017.json", function(raw_data) {
-// d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
->>>>>>> 70aefa8fec62191db9169815a50eb84bba20c62d
 
    // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
    // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
@@ -117,7 +110,7 @@ d3.json("data/nvdcve-1.0-2014.json", function(raw_data) {      // 2014 -> 653 CV
 
            else
                 obj.name = raw_data.CVE_Items[i].cve.description.description_data[0].value;
-           obj.group = d.cvssV3.baseSeverity;
+           obj.grup = d.cvssV3.baseSeverity;
 
           // obj._id = data.length;
            obj.cve = raw_data.CVE_Items[i].cve;
