@@ -1,26 +1,28 @@
-var width = 1000, height = 400;
+var theCloudWidth = 1000, theCloudHeight = 600;
 var interpolation = "basis";
 var placed = true;
 let maxFontSize = 40;
 let minFontSize = 8;
 let rotateCorner = 15;
 let backgroundOpacity = 0.1;
-var svg = d3.select("body").append('svg').attr({
-    width: width,
-    height: height,
+var cloudSvg = d3.select("#theCloud").append('svg').attr({
+    width: theCloudWidth,
+    height: theCloudHeight,
     id: "mainsvg"
 });
 
-var years = d3.range(2002, 2019, 1);
+var years = d3.range(2014, 2019, 1);
 
 var initialView = "vendors";
 var fileName;
-let year = 2018;
+let year = 2014;
 //fileName = document.getElementById("datasetsSelect").value;
+fileName = "nvdcve-1.0-2014";
+// fileName = "nvdcve-1.0-2015";
 // fileName = "nvdcve-1.0-2016";
 // fileName = "nvdcve-1.0-2017";
 // fileName = "nvdcve-1.0-2018-1";
-fileName = "nvdcve-1.0-2018";
+// fileName = "nvdcve-1.0-2018";
 fileName = "../data/"+fileName +".json";
 function addOptions(controlId, values){
     var select = document.getElementById(controlId);
@@ -32,34 +34,47 @@ function addOptions(controlId, values){
         select.appendChild(el);
         document.getElementById(controlId).value = initialView;
     }
-    loadData();
 }
 addOptions('viewTypeSelect', d3.keys(extractors));
-
+function getViewOption(){
+    let theViewTypeSelect = document.getElementById('viewTypeSelect');
+    let option = theViewTypeSelect.options[theViewTypeSelect.selectedIndex].text;
+    return option;
+}
 var spinner;
-function loadData(){
-    // START: loader spinner settings ****************************
-    var opts = {
-        lines: 25, // The number of lines to draw
-        length: 15, // The length of each line
-        width: 5, // The line thickness
-        radius: 25, // The radius of the inner circle
-        color: '#000', // #rgb or #rrggbb or array of colors
-        speed: 2, // Rounds per second
-        trail: 50, // Afterglow percentage
-        className: 'spinner', // The CSS class to assign to the spinner
-    };
-    var target = document.getElementById('loadingSpinner');
-    spinner = new Spinner(opts).spin(target);
-    loadCloudData(initialView, draw);
+// function loadData(){
+//     // // START: loader spinner settings ****************************
+//     // var opts = {
+//     //     lines: 25, // The number of lines to draw
+//     //     length: 15, // The length of each line
+//     //     width: 5, // The line thickness
+//     //     radius: 25, // The radius of the inner circle
+//     //     color: '#000', // #rgb or #rrggbb or array of colors
+//     //     speed: 2, // Rounds per second
+//     //     trail: 50, // Afterglow percentage
+//     //     className: 'spinner', // The CSS class to assign to the spinner
+//     // };
+//     // var target = document.getElementById('loadingSpinner');
+//     // spinner = new Spinner(opts).spin(target);
+//     //loadCloudData(initialView, draw);
+// }
+// // loadData();
+function loadNewCVEs(){
+    cloudSvg.selectAll("*").remove();
+    let option = getViewOption();
+    loadCloudCVEs(option, draw);
 }
 function loadNewData() {
-    svg.selectAll("*").remove();
-    let option = this.options[this.selectedIndex].text;
+    cloudSvg.selectAll("*").remove();
+    let option = getViewOption();
     loadCloudData(option, draw);
 }
 
 function draw(data){
+    cloudSvg.selectAll("*").remove();
+    if(!data || data.length == 0){
+        return;
+    }
     //Layout data
     var axisPadding = 10;
     var margins = {left: 20, top: 20, right: 10, bottom: 30};
@@ -77,7 +92,7 @@ function draw(data){
     var legendFontSize = 12;
     var legendHeight = boxes.topics.length*legendFontSize;
     //set svg data.
-    svg.attr({
+    cloudSvg.attr({
         width: width + margins.left + margins.top,
         height: height + margins.top + margins.bottom + axisPadding + legendHeight
     });
@@ -95,17 +110,17 @@ function draw(data){
 
     var xAxisScale = d3.scale.ordinal().domain(dates).rangeBands([0, width]);
     var xAxis = d3.svg.axis().orient('bottom').scale(xAxisScale);
-    var axisGroup = svg.append('g').attr('transform', 'translate(' + (margins.left) + ',' + (height+margins.top+axisPadding+legendHeight) + ')');
+    var axisGroup = cloudSvg.append('g').attr('transform', 'translate(' + (margins.left) + ',' + (height+margins.top+axisPadding+legendHeight) + ')');
     var axisNodes = axisGroup.call(xAxis);
     styleAxis(axisNodes);
     //Display the vertical gridline
     var xGridlineScale = d3.scale.ordinal().domain(d3.range(0, dates.length+1)).rangeBands([0, width+width/boxes.data.length]);
     var xGridlinesAxis = d3.svg.axis().orient('bottom').scale(xGridlineScale);
-    var xGridlinesGroup = svg.append('g').attr('transform', 'translate(' + (margins.left-width/boxes.data.length/2) + ',' + (height+margins.top + axisPadding+legendHeight+margins.bottom) + ')');
+    var xGridlinesGroup = cloudSvg.append('g').attr('transform', 'translate(' + (margins.left-width/boxes.data.length/2) + ',' + (height+margins.top + axisPadding+legendHeight+margins.bottom) + ')');
     var gridlineNodes = xGridlinesGroup.call(xGridlinesAxis.tickSize(-height-axisPadding-legendHeight-margins.bottom, 0, 0).tickFormat(''));
     styleGridlineNodes(gridlineNodes);
     //Main group
-    var mainGroup = svg.append('g').attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+    var mainGroup = cloudSvg.append('g').attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
     var wordStreamG = mainGroup.append('g');
 
     var topics = boxes.topics;
@@ -213,15 +228,31 @@ function draw(data){
             var data = t.__data__;
             var fontSize = data.fontSize;
             //The point
-            var thePoint = points[data.timeStep+1];;//+1 since we added 1 to the first point and 1 to the last point.
+            var thePoint = points[data.timeStep+1];//+1 since we added 1 to the first point and 1 to the last point.
             thePoint.y = -data.streamHeight;
             //Set it to visible.
             //Clone the nodes.
             var clonedNode = t.cloneNode(true);
             d3.select(clonedNode).attr({
                 visibility: "visible",
-                stroke: 'none',
-                'stroke-size': 0,
+                stroke: 'white',
+                'stroke-size': 0.2,
+                'style': 'cursor: pointer;'
+            }).on("click", ()=>{
+                let relatedCves = searchCVEs(data.date, data.topic, getViewOption(), data.text);
+                let input =  relatedCves;
+                var options = {
+                    collapsed: true,
+                    withQuotes: false
+                };
+                $('#json-renderer').jsonViewer(input, options);
+                $('#jsviewer').css("visibility", "visible");
+                var svgRect = document.getElementById("mainsvg").getBoundingClientRect();
+                var jsviewer = document.getElementById('jsviewer');
+                jsviewer.style.top = (svgRect.top + svgRect.height + 20) + "px";
+                jsviewer.style.left = (svgRect.left)+"px";
+                jsviewer.style.width = (svgRect.width)+"px";
+
             });
             var clonedParentNode = t.parentNode.cloneNode(false);
             clonedParentNode.appendChild(clonedNode);
@@ -275,7 +306,7 @@ function draw(data){
     });
 
     //Build the legends
-    var legendGroup = svg.append('g').attr('transform', 'translate(' + margins.left + ',' + (height+margins.top) + ')');
+    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + margins.left + ',' + (height+margins.top) + ')');
     var legendNodes = legendGroup.selectAll('g').data(boxes.topics).enter().append('g')
     .attr('transform', function(d, i){return 'translate(' + 10 + ',' + (i*legendFontSize) + ')';});
     legendNodes.append('circle').attr({
@@ -290,7 +321,7 @@ function draw(data){
         'alignment-baseline': 'middle',
         dx: 8
     });
-    spinner.stop();
+    // spinner.stop();
 };
 function styleAxis(axisNodes){
     axisNodes.selectAll('.domain').attr({
@@ -324,5 +355,8 @@ var colors = {
 };
 function color(d,a) {
     var c = colors[d];
+    if(!c){
+        return "#000";
+    }
     return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
 }

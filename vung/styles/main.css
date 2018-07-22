@@ -1,5 +1,5 @@
 #holder1 {
-    position:absolute;
+    position:relative;
     border-radius: 0px;
     z-index: 1110;
     /*top: 94px;*/
@@ -17,7 +17,7 @@
     background: #eee;
 }
 #mainsvg{
-    position:absolute;
+    position:relative;
     top:-10px;
-    left: 205px;
+    left: 3px;
 }

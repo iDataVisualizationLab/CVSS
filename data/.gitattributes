@@ -1,0 +1,2 @@
+*.json filter=lfs diff=lfs merge=lfs -text
+nvdcve-1.0-2017.json filter=lfs diff=lfs merge=lfs -text
