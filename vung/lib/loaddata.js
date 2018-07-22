@@ -15,6 +15,7 @@ let baseScoreAccessChain = ['impact', baseMetric, cvssVersion, baseScore];
 let baseSeverity = "baseSeverity";
 let baseSeverityAccessChain = ['impact', baseMetric, cvssVersion, baseSeverity];
 let baseSeverityAccessChainV2 = ['impact', baseMetricV2, "severity"];
+
 function getOverallScore(d) {
     let is = accessChain(d, impactScoreAccessChain);
     let es = accessChain(d, exploitabilityScoreAccessChain);
@@ -38,6 +39,7 @@ let criticalOrder = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 let stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"];
 let removeWords = ["object", "Object", "", " ", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'via', 'can', 'vulnerability', 'allows', 'allow', 'access'];
 stopWords = stopWords.concat(removeWords);
+
 function removeStopWords(words, stopWords) {
     let result = [];
     words.forEach(w => {
@@ -46,8 +48,8 @@ function removeStopWords(words, stopWords) {
         }
     });
     let result1 = [];
-    result.forEach(d=>{
-        if(d.length>=2){
+    result.forEach(d => {
+        if (d.length >= 2) {
             result1.push(d);
         }
     });
@@ -56,7 +58,7 @@ function removeStopWords(words, stopWords) {
 }
 
 
-let extractors={
+let extractors = {
     'vendors': vendorExtractor,
     'problemTypes': problemTypeExtractor,
     'descriptions': descriptionExtractor,
@@ -81,10 +83,10 @@ function cveDescriptionExtractor(d) {
     return words;
 }
 
-function descriptionExtractor(d){
+function descriptionExtractor(d) {
     let values = d.values;
     let parts = [];
-    values.forEach(d=>{
+    values.forEach(d => {
         let words = cveDescriptionExtractor(d);
         parts = parts.concat(words);
     });
@@ -102,7 +104,7 @@ function cveProblemTypeExtractor(d) {
     return cveProbs;
 }
 
-function problemTypeExtractor(d){
+function problemTypeExtractor(d) {
     let problemTypes = [];
     d.values.forEach(d => {
         let cveProbs = cveProblemTypeExtractor(d);
@@ -125,30 +127,34 @@ function vendorExtractor(d) {
     });
     return vendors;
 }
-function cveProductExtractor(cve){
+
+function cveProductExtractor(cve) {
     let products = [];
     let vendors = [];
     vendors = vendors.concat(accessChain(cve, vendorAccessChain));
-    vendors.forEach(vd=>{
-        products = products.concat(vd['product']['product_data'].map(pd=>pd['product_name']));
+    vendors.forEach(vd => {
+        products = products.concat(vd['product']['product_data'].map(pd => pd['product_name']));
     });
     return products;
 }
-function productExtractor(d){
+
+function productExtractor(d) {
     let products = [];
-    d.values.forEach(cve=>{
+    d.values.forEach(cve => {
         let prods = cveProductExtractor(cve);
         products = products.concat(prods);
     });
     return products;
 }
-let cves=null;
-function searchCVEs(month, baseSeverity, type, term){
+
+let cves = null;
+
+function searchCVEs(month, baseSeverity, type, term) {
     let monthFormat = d3.time.format('%b %Y');
-    let filteredCVEs = cves.filter(cve=>{
+    let filteredCVEs = cves.filter(cve => {
         //Date condition
         let date = monthFormat(new Date(cve[dateType]));
-        let dateCondition = date===month;
+        let dateCondition = date === month;
         //baseSeverity condition
         let cveBaseSeverity = baseSeverityExtractor(cve, baseSeverityAccessChain);
         let baseSeverityCondition = cveBaseSeverity === baseSeverity;
@@ -167,11 +173,11 @@ function baseSeverityExtractor(d) {
 }
 
 function loadCloudData(viewOption, draw) {
-    let topics = d3.keys(scores);
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
         //Filter data in a year
         let monthFormat = d3.time.format('%b %Y');
+        //filter by years.
         cves = rawData['CVE_Items'];
         let year1 = new Date(year + '-01-01T00:00Z');
         let year2 = new Date((year + 1) + '-01-01T00:00Z');
@@ -180,69 +186,82 @@ function loadCloudData(viewOption, draw) {
             let date = new Date(d[dateType]);
             return (date >= year1) && (date < year2);
         });
-        var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
-        data = data.map(d => {
-            d.date = d.key;
-            d.totalFrequencies = d.values.length;
-            let nestedTopics = d3.nest().key(d => baseSeverityExtractor(d)).entries(d.values);
-            //Filter the null key
-            nestedTopics = nestedTopics.filter(d=>d.key!=='null');
-            let topics = nestedTopics.map(d => {
-                let frequency = d.values.length;
-                let key = d.key;
-                let text;
-                let allTerms = extractors[viewOption](d);
-                //Count frequencies
-                var counts = allTerms.reduce(function (obj, word) {
-                    if (!obj[word]) {
-                        obj[word] = 0;
-                    }
-                    obj[word]++;
-                    return obj;
-                }, {});
-                //Convert to array of objects
-                text = d3.keys(counts).map(function (d) {
-                    return {
-                        text: d,
-                        frequency: counts[d],
-                        topic: key
-                    }
-                }).sort(function (a, b) {//sort the terms by frequency
-                    return b.frequency - a.frequency;
-                }).filter(function (d) {
-                    return d.text;
-                });//filter out empty words
-                text = text.slice(0, Math.min(text.length, 45));
-
-                d[d.key] = {
-                    text: text,
-                    frequency: frequency
-                };
-                delete d.key;
-                delete d.values;
-                return d;
-            });
-
-            d.topics = {};
-            topics.sort((a, b) => {
-                let topicA = d3.keys(a)[0];
-                let topicB = d3.keys(b)[0];
-                return criticalOrder.indexOf(topicB) - criticalOrder.indexOf(topicA);
-            });
-
-            topics.forEach(topic => {
-                for (let key in topic) {
-                    d.topics[key] = topic[key];
-                }
-            });
-            delete d.values;
-            delete d.key;
-            return d;
-        }).sort(function (a, b) {//sort by date
-            return monthFormat.parse(a.date) - monthFormat.parse(b.date);
-        });
-        draw(data);
+        loadCloudCVEs(viewOption, draw);
     });
+}
+
+function modifiedCVEsToOriginalCVEs(theCves){
+    return theCves.map(d=>d['originalCVE']);
+}
+function loadCloudCVEs(viewOption, draw) {
+    if(!cves || cves.length == 0){
+        draw(null);
+        return;
+    }
+    //Filter data in a year
+    let monthFormat = d3.time.format('%b %Y');
+    var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
+    data = data.map(d => {
+        d.date = d.key;
+        d.totalFrequencies = d.values.length;
+        let nestedTopics = d3.nest().key(d => baseSeverityExtractor(d)).entries(d.values);
+        //Filter the null key
+        nestedTopics = nestedTopics.filter(d => d.key !== 'null');
+        let topics = nestedTopics.map(d => {
+            let frequency = d.values.length;
+            let key = d.key;
+            let text;
+            let allTerms = extractors[viewOption](d);
+            //Count frequencies
+            var counts = allTerms.reduce(function (obj, word) {
+                if (!obj[word]) {
+                    obj[word] = 0;
+                }
+                obj[word]++;
+                return obj;
+            }, {});
+            //Convert to array of objects
+            text = d3.keys(counts).map(function (d) {
+                return {
+                    text: d,
+                    frequency: counts[d],
+                    topic: key
+                }
+            }).sort(function (a, b) {//sort the terms by frequency
+                return b.frequency - a.frequency;
+            }).filter(function (d) {
+                return d.text;
+            });//filter out empty words
+            text = text.slice(0, Math.min(text.length, 45));
+
+            d[d.key] = {
+                text: text,
+                frequency: frequency
+            };
+            delete d.key;
+            delete d.values;
+            return d;
+        });
+
+        d.topics = {};
+        topics.sort((a, b) => {
+            let topicA = d3.keys(a)[0];
+            let topicB = d3.keys(b)[0];
+            return criticalOrder.indexOf(topicB) - criticalOrder.indexOf(topicA);
+        });
+
+        topics.forEach(topic => {
+            for (let key in topic) {
+                d.topics[key] = topic[key];
+            }
+        });
+        delete d.values;
+        delete d.key;
+        return d;
+    }).sort(function (a, b) {//sort by date
+        return monthFormat.parse(a.date) - monthFormat.parse(b.date);
+    });
+    draw(data);
 }
 
 function accessChain(obj, chain) {

@@ -1,13 +1,13 @@
-var width = 1500, height = 1000;
+var theCloudWidth = 1000, theCloudHeight = 600;
 var interpolation = "basis";
 var placed = true;
 let maxFontSize = 40;
 let minFontSize = 8;
 let rotateCorner = 15;
 let backgroundOpacity = 0.1;
-var svg = d3.select("body").append('svg').attr({
-    width: width,
-    height: height,
+var cloudSvg = d3.select("#theCloud").append('svg').attr({
+    width: theCloudWidth,
+    height: theCloudHeight,
     id: "mainsvg"
 });
 
@@ -34,7 +34,6 @@ function addOptions(controlId, values){
         select.appendChild(el);
         document.getElementById(controlId).value = initialView;
     }
-    loadData();
 }
 addOptions('viewTypeSelect', d3.keys(extractors));
 function getViewOption(){
@@ -43,29 +42,39 @@ function getViewOption(){
     return option;
 }
 var spinner;
-function loadData(){
-    // START: loader spinner settings ****************************
-    var opts = {
-        lines: 25, // The number of lines to draw
-        length: 15, // The length of each line
-        width: 5, // The line thickness
-        radius: 25, // The radius of the inner circle
-        color: '#000', // #rgb or #rrggbb or array of colors
-        speed: 2, // Rounds per second
-        trail: 50, // Afterglow percentage
-        className: 'spinner', // The CSS class to assign to the spinner
-    };
-    var target = document.getElementById('loadingSpinner');
-    spinner = new Spinner(opts).spin(target);
-    loadCloudData(initialView, draw);
+// function loadData(){
+//     // // START: loader spinner settings ****************************
+//     // var opts = {
+//     //     lines: 25, // The number of lines to draw
+//     //     length: 15, // The length of each line
+//     //     width: 5, // The line thickness
+//     //     radius: 25, // The radius of the inner circle
+//     //     color: '#000', // #rgb or #rrggbb or array of colors
+//     //     speed: 2, // Rounds per second
+//     //     trail: 50, // Afterglow percentage
+//     //     className: 'spinner', // The CSS class to assign to the spinner
+//     // };
+//     // var target = document.getElementById('loadingSpinner');
+//     // spinner = new Spinner(opts).spin(target);
+//     //loadCloudData(initialView, draw);
+// }
+// // loadData();
+function loadNewCVEs(){
+    cloudSvg.selectAll("*").remove();
+    let option = getViewOption();
+    loadCloudCVEs(option, draw);
 }
 function loadNewData() {
-    svg.selectAll("*").remove();
+    cloudSvg.selectAll("*").remove();
     let option = getViewOption();
     loadCloudData(option, draw);
 }
 
 function draw(data){
+    cloudSvg.selectAll("*").remove();
+    if(!data || data.length == 0){
+        return;
+    }
     //Layout data
     var axisPadding = 10;
     var margins = {left: 20, top: 20, right: 10, bottom: 30};
@@ -83,7 +92,7 @@ function draw(data){
     var legendFontSize = 12;
     var legendHeight = boxes.topics.length*legendFontSize;
     //set svg data.
-    svg.attr({
+    cloudSvg.attr({
         width: width + margins.left + margins.top,
         height: height + margins.top + margins.bottom + axisPadding + legendHeight
     });
@@ -101,17 +110,17 @@ function draw(data){
 
     var xAxisScale = d3.scale.ordinal().domain(dates).rangeBands([0, width]);
     var xAxis = d3.svg.axis().orient('bottom').scale(xAxisScale);
-    var axisGroup = svg.append('g').attr('transform', 'translate(' + (margins.left) + ',' + (height+margins.top+axisPadding+legendHeight) + ')');
+    var axisGroup = cloudSvg.append('g').attr('transform', 'translate(' + (margins.left) + ',' + (height+margins.top+axisPadding+legendHeight) + ')');
     var axisNodes = axisGroup.call(xAxis);
     styleAxis(axisNodes);
     //Display the vertical gridline
     var xGridlineScale = d3.scale.ordinal().domain(d3.range(0, dates.length+1)).rangeBands([0, width+width/boxes.data.length]);
     var xGridlinesAxis = d3.svg.axis().orient('bottom').scale(xGridlineScale);
-    var xGridlinesGroup = svg.append('g').attr('transform', 'translate(' + (margins.left-width/boxes.data.length/2) + ',' + (height+margins.top + axisPadding+legendHeight+margins.bottom) + ')');
+    var xGridlinesGroup = cloudSvg.append('g').attr('transform', 'translate(' + (margins.left-width/boxes.data.length/2) + ',' + (height+margins.top + axisPadding+legendHeight+margins.bottom) + ')');
     var gridlineNodes = xGridlinesGroup.call(xGridlinesAxis.tickSize(-height-axisPadding-legendHeight-margins.bottom, 0, 0).tickFormat(''));
     styleGridlineNodes(gridlineNodes);
     //Main group
-    var mainGroup = svg.append('g').attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+    var mainGroup = cloudSvg.append('g').attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
     var wordStreamG = mainGroup.append('g');
 
     var topics = boxes.topics;
@@ -297,7 +306,7 @@ function draw(data){
     });
 
     //Build the legends
-    var legendGroup = svg.append('g').attr('transform', 'translate(' + margins.left + ',' + (height+margins.top) + ')');
+    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + margins.left + ',' + (height+margins.top) + ')');
     var legendNodes = legendGroup.selectAll('g').data(boxes.topics).enter().append('g')
     .attr('transform', function(d, i){return 'translate(' + 10 + ',' + (i*legendFontSize) + ')';});
     legendNodes.append('circle').attr({
@@ -312,7 +321,7 @@ function draw(data){
         'alignment-baseline': 'middle',
         dx: 8
     });
-    spinner.stop();
+    // spinner.stop();
 };
 function styleAxis(axisNodes){
     axisNodes.selectAll('.domain').attr({

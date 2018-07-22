@@ -4,11 +4,21 @@
 <html>
 <head>
     <link rel="icon" type="image/gif"
-          href="images/fav.gif" />
+          href="images/fav.gif"/>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <title>CVExplorer</title>
-    <link rel="stylesheet" type="text/css" href="styles/parallel.css" />
-    <link rel="stylesheet" type="text/css" href="styles/main.css" />
+    <link rel="stylesheet" type="text/css" href="styles/parallel.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <script src="javascripts/d3.v3.min.js"></script>
+    <!--<script src="javascripts/d3.v2.js"></script>-->
+    <!--vung's external files-->
+    <script src="vung/lib/loaddata.js"></script>
+    <script src="vung/lib/d3.layout.wordstream.js"></script>
+    <script src="vung/javascripts/jquery/jquery-1.9.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="vung/styles/main.css" media="screen"/>
+    <script src="vung/lib/json-viewer/jquery.json-viewer.js"></script>
+    <link href="vung/lib/json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet"/>
+
 </head>
 <body>
 <div id="header">
@@ -17,8 +27,13 @@
     <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
     <button title="Export data as CSV" id="export-data">Export</button>
     <div class="controls">
-        <strong id="rendered-count"></strong>/<strong id="selected-count"></strong><!--<strong id="data-count"></strong>-->
-        <div class="fillbar"><div id="selected-bar"><div id="rendered-bar">&nbsp;</div></div></div>
+        <strong id="rendered-count"></strong>/<strong id="selected-count"></strong>
+        <!--<strong id="data-count"></strong>-->
+        <div class="fillbar">
+            <div id="selected-bar">
+                <div id="rendered-bar">&nbsp;</div>
+            </div>
+        </div>
         Lines at <strong id="opacity"></strong> opacity.
         <span class="settings">
         <button id="hide-ticks">Hide Ticks</button>
@@ -33,10 +48,8 @@
     <canvas id="background"></canvas>
     <canvas id="foreground"></canvas>
     <canvas id="highlight"></canvas>
-    <svg></svg>
+    <svg id="parallelSVG"></svg>
 </div>
-
-
 
 
 <div id="wrap">
@@ -49,10 +62,11 @@
             <h3>What is this?</h3>
             <p>
                 The parallel coordinates displays CVSS v3.0 on 3 main scores. Each CVE Entry is a polyline.
-           <br>
-                <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read this tutorial.</a>
+                <br>
+                <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read
+                    this tutorial.</a>
             </p>
-         </div>
+        </div>
 
         <div class="little-box">
             <h3>Controls</h3>
@@ -75,9 +89,20 @@
         </p>
     </div>
 
-    <div  class="half">
-       
-        <div id="chart2"></div>
+    <!--<div  class="half">-->
+    <!--<div id="chart2"></div>-->
+    <!--</div>-->
+    <div class="half">
+        <div id="chart23">
+            <div id="holder1" class="holder1">
+                <select id="viewTypeSelect" class="styled-select" onchange="loadNewCVEs.call(this, event)"></select>
+            </div>
+            <div id="theCloud"></div>
+            <div id="jsviewer" style="visibility: hidden;position: absolute;">
+                <pre id="json-renderer"
+                     style=" border: 1px solid #aaa; padding: 0.5em 1.5em; font-family: sans-serif;"></pre>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -87,15 +112,11 @@
 </div>
 
 
-
 </body>
-<!--<script src="javascripts/d3.v3.min.js"></script> -->
-<script src="javascripts/d3.v2.js"></script>
 <script src="https://underscorejs.org/underscore.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="myscripts/cloud.js"></script>
+<!--<script src="myscripts/cloud.js"></script>-->
 <script src="myscripts/parallel.js"></script>
-
-
 <script src="myscripts/network.js"></script>
+<!--vung's main.js-->
+<script src="vung/javascripts/main.js"></script>
 </html>
