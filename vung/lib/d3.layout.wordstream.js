@@ -52,7 +52,8 @@ d3.layout.wordStream = function(){
         data.forEach(d=>{
             topics = topics.concat(d3.keys(d.topics));
         });
-        return d3.set(topics).values();
+        //TODO: This is a quick-fix => ordering or not should be done separately.
+        return d3.set(topics).values().sort((topicA, topicB)=>{return criticalOrder.indexOf(topicB) - criticalOrder.indexOf(topicA);});
     }
     //#region helper functions
     function buildFontScale(data){

@@ -192,6 +192,7 @@ function loadISPData(viewOption, draw){
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
         cves = rawData;
+
         loadCloudCVEs(viewOption, draw);
     });
 }
