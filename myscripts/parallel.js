@@ -634,7 +634,9 @@ function brush() {
     // drawWordCloud(text_string);
 
     //Vung's word cloud
+
     cves = modifiedCVEsToOriginalCVEs(selected);
+
     loadCloudCVEs(getViewOption(), draw);
 
     // Tommy 2018, NETWORK     **************************************
