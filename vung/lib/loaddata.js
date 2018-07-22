@@ -16,30 +16,12 @@ let baseSeverity = "baseSeverity";
 let baseSeverityAccessChain = ['impact', baseMetric, cvssVersion, baseSeverity];
 let baseSeverityAccessChainV2 = ['impact', baseMetricV2, "severity"];
 
-function getOverallScore(d) {
-    let is = accessChain(d, impactScoreAccessChain);
-    let es = accessChain(d, exploitabilityScoreAccessChain);
-    let bs = accessChain(d, baseScoreAccessChain);
-    return d3.max([is, es, bs]);
-}
-
-let scores = {
-    "0-1": [-1, 1],//-1 here since for 0 we would like it to belong to this range too.
-    "1-2": [1, 2],
-    "2-3": [2, 3],
-    "3-4": [3, 4],
-    "4-5": [4, 5],
-    "5-6": [5, 6],
-    "6-7": [6, 7],
-    "7-8": [7, 8],
-    "8-9": [8, 9],
-    "9-10": [9, 10]
-};
 let criticalOrder = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+
+//<editor-fold desc="process stopwords">
 let stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"];
 let removeWords = ["object", "Object", "", " ", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'via', 'can', 'vulnerability', 'allows', 'allow', 'access'];
 stopWords = stopWords.concat(removeWords);
-
 function removeStopWords(words, stopWords) {
     let result = [];
     words.forEach(w => {
@@ -56,8 +38,9 @@ function removeStopWords(words, stopWords) {
     result = result1;
     return result;
 }
+//</editor-fold>
 
-
+//<editor-fold desc="extracting data">
 let extractors = {
     'vendors': vendorExtractor,
     'problemTypes': problemTypeExtractor,
@@ -69,6 +52,9 @@ let cveTermExtractors = {
     'problemTypes': cveProblemTypeExtractor,
     'descriptions': cveDescriptionExtractor,
     'products': cveProductExtractor
+}
+function baseSeverityExtractor(d) {
+    return accessChain(d, baseSeverityAccessChain) ? accessChain(d, baseSeverityAccessChain) : accessChain(d, baseSeverityAccessChainV2);
 }
 
 function cveDescriptionExtractor(d) {
@@ -146,6 +132,7 @@ function productExtractor(d) {
     });
     return products;
 }
+//</editor-fold>
 
 let cves = null;
 
@@ -168,10 +155,6 @@ function searchCVEs(month, baseSeverity, type, term) {
     return filteredCVEs;
 }
 
-function baseSeverityExtractor(d) {
-    return accessChain(d, baseSeverityAccessChain) ? accessChain(d, baseSeverityAccessChain) : accessChain(d, baseSeverityAccessChainV2);
-}
-
 function loadCloudData(viewOption, draw) {
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
@@ -189,17 +172,35 @@ function loadCloudData(viewOption, draw) {
 }
 
 function loadISPData(viewOption, draw){
+    let fileName = "data/isp1.json";
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
         cves = rawData;
-
+        //Filter date
+        let year1 = new Date(2010 + '-01-01T00:00Z');
+        let year2 = new Date((2018 + 1) + '-01-01T00:00Z');
+        //Filter by date
+        cves = cves.filter(d => {
+            let date = new Date(d[dateType]);
+            return (date >= year1) && (date < year2);
+        });
         loadCloudCVEs(viewOption, draw);
     });
 }
+function loadISPData(){
+    loadISPData("vendors", draw)
+}
 
+function loadData(){
+    year = +$("#cveYear").val();
+    fileName = "nvdcve-1.0-" + year;
+    fileName = "../data/"+fileName +".json";
+    loadCloudData("vendors", draw);
+}
 function modifiedCVEsToOriginalCVEs(theCves){
     return theCves.map(d=>d['originalCVE']);
 }
+
 function loadCloudCVEs(viewOption, draw) {
     if(!cves || cves.length == 0){
         draw(null);
@@ -280,14 +281,4 @@ function accessChain(obj, chain) {
         result = result[chain[i]];
     }
     return result;
-}
-
-function scoreScale(score) {
-    let keys = d3.keys(scores)
-    for (let i = 0; i < keys.length; i++) {
-        let key = keys[i];
-        if (score > scores[key][0] && score <= scores[key][1]) {
-            return key;
-        }
-    }
 }

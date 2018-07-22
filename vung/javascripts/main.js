@@ -17,10 +17,12 @@ let year = 2017;
 // fileName = "nvdcve-1.0-2014";
 // fileName = "nvdcve-1.0-2015";
 // fileName = "nvdcve-1.0-2016";
+// fileName = "nvdcve-1.0-2017";
 fileName = "isp1";
 // fileName = "nvdcve-1.0-2018-1";
 // fileName = "nvdcve-1.0-2018";
 fileName = "../data/"+fileName +".json";
+
 function addOptions(controlId, values){
     var select = document.getElementById(controlId);
     for(var i = 0; i < values.length; i++) {

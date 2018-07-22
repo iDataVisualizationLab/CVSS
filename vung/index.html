@@ -11,14 +11,17 @@
     <link rel="stylesheet" type="text/css" href="styles/main.css" media="screen"/>
     <script src="lib/json-viewer/jquery.json-viewer.js"></script>
     <link href="lib/json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet"/>
+    <script type="text/javascript" src="lib/colors.js"></script>
 
 </head>
 <body>
 <div id="loadingSpinner">
     <!-- <span id="progressText"> -->
 </div>
+<button onclick="loadISPData.call(this, event)">Load ISP data</button>
+<input type="text" id="cveYear"/><button onclick="loadData.call(this, event)">Load Year data</button>
 <div id="holder1" class="holder1">
-    <select id="viewTypeSelect" class="styled-select" onchange="loadNewData.call(this, event)"></select>
+    <select id="viewTypeSelect" class="styled-select" onchange="loadNewCVEs.call(this, event)"></select>
 </div>
 <div id="theCloud"></div>
 <div id="jsviewer" style="visibility: hidden;position: absolute;">
@@ -29,9 +32,5 @@
 <script src="./javascripts/main.js"></script>
 <script type='text/javascript' src="https://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
 <link href="styles/jquery-ui.css" rel="stylesheet" type="text/css"/>
-<script src="lib/colors.js"/>
-<script type="text/javascript">
-    loadISPData("vendors", draw);
-</script>
 </body>
 </html>
