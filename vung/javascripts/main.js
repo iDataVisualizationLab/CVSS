@@ -356,7 +356,7 @@ var colors = {
 function color(d,a) {
     var c = colors[d];
     if(!c){
-        debugger
+        return "#000";
     }
     return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
 }

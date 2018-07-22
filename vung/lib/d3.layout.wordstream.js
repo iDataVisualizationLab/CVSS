@@ -47,10 +47,16 @@ d3.layout.wordStream = function(){
         }
         return boxes;
     };
-
+    function getTopics(data){
+        let topics = [];
+        data.forEach(d=>{
+            topics = topics.concat(d3.keys(d.topics));
+        });
+        return d3.set(topics).values();
+    }
     //#region helper functions
     function buildFontScale(data){
-        var topics = d3.keys(data[0].topics);
+        var topics = getTopics(data);
         //#region scale for the font size.
         var maxFrequency = 0;
         var minFrequency = Number.MAX_SAFE_INTEGER;
@@ -79,7 +85,7 @@ d3.layout.wordStream = function(){
     function buildBoxes(data){
         //Build settings based on frequencies
         var totalFrequencies  = calculateTotalFrequenciesABox(data)
-        var topics = d3.keys(data[0].topics);
+        var topics = getTopics(data);
         //#region creating boxes
         var numberOfBoxes = data.length;
         var boxes = {};
@@ -374,7 +380,7 @@ d3.layout.wordStream = function(){
         return c.getImageData(0, 0, cw, ch);
     }
     function calculateTotalFrequenciesABox(data){
-        var topics = d3.keys(data[0].topics);
+        var topics = getTopics(data);
         var totalFrequenciesABox = Array();
         d3.map(data, function(row){
             var aBox = {};
