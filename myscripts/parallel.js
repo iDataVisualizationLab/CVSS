@@ -6,7 +6,7 @@ var width = document.body.clientWidth,
     height = 600;
 
 var m = [35, 0, 10, height],
-    w = width - m[1] - m[3],
+    w = width - m[1] - m[3]+80,
     h = height - m[0] - m[2],
     xscale = d3.scale.ordinal().rangePoints([0, w], 1),
     yscale = {},
@@ -97,8 +97,8 @@ var svg = d3.select("#parallelSVG")
 
 // Load the data and visualization
 d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 CVEs
-//d3.json("data2/nvdcve-1.0-2016.json", function(raw_data) {
-//d3.json("../data2/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
+//d3.json("data/nvdcve-1.0-2016.json", function(raw_data) {
+//d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 //d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
 
     // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
@@ -116,7 +116,7 @@ d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 C
 
             else
                 obj.name = raw_data.CVE_Items[i].cve.description.description_data[0].value;
-            obj.grup = d.cvssV3.baseSeverity;
+            obj.group = d.cvssV3.baseSeverity;
 
             // obj._id = data.length;
             obj.cve = raw_data.CVE_Items[i].cve;
@@ -547,21 +547,24 @@ function invert_axis(d) {
 function path(d, ctx, color) {
     if (color) ctx.strokeStyle = color;
     ctx.beginPath();
-    var x0 = xscale(0) - 15,
+    var x0 = xscale(0),
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0, y0);
     dimensions.map(function (p, i) {
-        var x = xscale(p),
+        var gap =0;
+        if (i==0)
+            gap=(width-600)/24;
+        var x = xscale(p)-gap,
             y = yscale[p](d[p]);
-        var cp1x = x - 0.88 * (x - x0);
+        var cp1x = x - 0.8 * (x - x0)-gap;
         var cp1y = y0;
-        var cp2x = x - 0.12 * (x - x0);
+        var cp2x = x - 0.2 * (x - x0)-gap;
         var cp2y = y;
         ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
         x0 = x;
         y0 = y;
     });
-    ctx.lineTo(x0 + 15, y0);                               // right edge
+    ctx.lineTo(x0 - 15, y0);                               // right edge
     ctx.stroke();
 };
 
@@ -686,7 +689,6 @@ function brush() {
     // drawWordCloud(text_string);
 
     //Vung's word cloud
-
     cves = modifiedCVEsToOriginalCVEs(selected);
     loadCloudCVEs(getViewOption(), draw);
 
@@ -709,7 +711,7 @@ function paths(selected, ctx, count) {
 
     shuffled_data = _.shuffle(selected);
 
-    data_table(shuffled_data.slice(0, 25));
+    data_table(shuffled_data.slice(0, 40));
 
     ctx.clearRect(0, 0, w + 1, h + 1);
 

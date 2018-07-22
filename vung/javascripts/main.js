@@ -1,13 +1,10 @@
-var theCloudWidth = 1000, theCloudHeight = 600;
 var interpolation = "basis";
 var placed = true;
 let maxFontSize = 40;
 let minFontSize = 8;
 let rotateCorner = 15;
-let backgroundOpacity = 0.1;
+let backgroundOpacity = 0.2;
 var cloudSvg = d3.select("#theCloud").append('svg').attr({
-    width: theCloudWidth,
-    height: theCloudHeight,
     id: "mainsvg"
 });
 
@@ -71,15 +68,18 @@ function loadNewData() {
 }
 
 function draw(data){
+    var width = 1560;
+    var height = 500;
+
     cloudSvg.selectAll("*").remove();
     if(!data || data.length == 0){
         return;
     }
     //Layout data
-    var axisPadding = 10;
-    var margins = {left: 20, top: 20, right: 10, bottom: 30};
+    var axisPadding = 0;
+    var margins = {left: 40, top: 0, right: 10, bottom: 20};
     var ws = d3.layout.wordStream()
-    .size([width, height])
+    .size([width, height*1.1])
     .interpolate(interpolation)
     //.fontScale(d3.scale.pow().exponent(2))
     .fontScale(d3.scale.linear())
@@ -346,17 +346,8 @@ function styleGridlineNodes(gridlineNodes){
         stroke: 'lightgray'
     });
 }
-var colors = {
-    "CRITICAL":[0,100,50],
-    "HIGH": [35,100,50],
-    "MEDIUM": [60,100,39],
-    "LOW": [120,100,45],
-    "NONE": [0,0,0]
-};
+
 function color(d,a) {
     var c = colors[d];
-    if(!c){
-        return "#000";
-    }
     return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
 }
