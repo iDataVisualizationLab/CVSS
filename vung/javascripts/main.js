@@ -68,6 +68,7 @@ function loadNewData() {
 }
 
 function draw(data){
+    let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
     var width = 1770;
     var height = 590;
 
@@ -187,7 +188,7 @@ function draw(data){
         });
         allTexts.attr({
             stroke: 'red',
-            'stroke-width': 1
+            'stroke-width': 0.5
         });
     });
     mainGroup.selectAll('text').on('mouseout', function(){
@@ -235,7 +236,7 @@ function draw(data){
             d3.select(clonedNode).attr({
                 visibility: "visible",
                 stroke: 'white',
-                'stroke-size': 0.2,
+                'stroke-width': fontStrokeScale(+d3.select(clonedNode).attr("font-size")),
                 'style': 'cursor: pointer;'
             }).on("click", ()=>{
                 let relatedCves = searchCVEs(data.date, data.topic, getViewOption(), data.text);
