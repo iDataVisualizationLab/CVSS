@@ -188,6 +188,14 @@ function loadCloudData(viewOption, draw) {
     });
 }
 
+function loadISPData(viewOption, draw){
+    d3.json(fileName, function (error, rawData) {
+        if (error) throw error;
+        cves = rawData;
+        loadCloudCVEs(viewOption, draw);
+    });
+}
+
 function modifiedCVEsToOriginalCVEs(theCves){
     return theCves.map(d=>d['originalCVE']);
 }

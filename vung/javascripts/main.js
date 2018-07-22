@@ -17,7 +17,7 @@ let year = 2017;
 // fileName = "nvdcve-1.0-2014";
 // fileName = "nvdcve-1.0-2015";
 // fileName = "nvdcve-1.0-2016";
-fileName = "nvdcve-1.0-2017";
+fileName = "isp1";
 // fileName = "nvdcve-1.0-2018-1";
 // fileName = "nvdcve-1.0-2018";
 fileName = "../data/"+fileName +".json";
@@ -78,7 +78,7 @@ function draw(data){
     }
     //Layout data
     var axisPadding = 0;
-    var margins = {left: 40, top: 0, right: 10, bottom: 20};
+    var margins = {left: 40, top: 0, right: 0, bottom: 20};
     var ws = d3.layout.wordStream()
     .size([width, height*1.1])
     .interpolate(interpolation)
@@ -306,7 +306,7 @@ function draw(data){
     });
 
     //Build the legends
-    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + margins.left + ',' + (height+margins.top) + ')');
+    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + (61) + ',' + (60) + ')');
     var legendNodes = legendGroup.selectAll('g').data(boxes.topics).enter().append('g')
     .attr('transform', function(d, i){return 'translate(' + 10 + ',' + (i*legendFontSize) + ')';});
     legendNodes.append('circle').attr({
