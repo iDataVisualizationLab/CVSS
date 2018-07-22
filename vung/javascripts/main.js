@@ -12,12 +12,12 @@ var years = d3.range(2014, 2019, 1);
 
 var initialView = "vendors";
 var fileName;
-let year = 2014;
+let year = 2017;
 //fileName = document.getElementById("datasetsSelect").value;
-fileName = "nvdcve-1.0-2014";
+// fileName = "nvdcve-1.0-2014";
 // fileName = "nvdcve-1.0-2015";
 // fileName = "nvdcve-1.0-2016";
-// fileName = "nvdcve-1.0-2017";
+fileName = "nvdcve-1.0-2017";
 // fileName = "nvdcve-1.0-2018-1";
 // fileName = "nvdcve-1.0-2018";
 fileName = "../data/"+fileName +".json";
@@ -81,7 +81,6 @@ function draw(data){
     var ws = d3.layout.wordStream()
     .size([width, height*1.1])
     .interpolate(interpolation)
-    //.fontScale(d3.scale.pow().exponent(2))
     .fontScale(d3.scale.linear())
     .minFontSize(minFontSize)
     .maxFontSize(maxFontSize)

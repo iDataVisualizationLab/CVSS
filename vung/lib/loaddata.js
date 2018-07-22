@@ -175,8 +175,6 @@ function baseSeverityExtractor(d) {
 function loadCloudData(viewOption, draw) {
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
-        //Filter data in a year
-        let monthFormat = d3.time.format('%b %Y');
         //filter by years.
         cves = rawData['CVE_Items'];
         let year1 = new Date(year + '-01-01T00:00Z');
