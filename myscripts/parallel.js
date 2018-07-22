@@ -75,7 +75,7 @@ d3.selectAll("canvas")
 foreground = document.getElementById('foreground').getContext('2d');
 foreground.globalCompositeOperation = "destination-over";
 foreground.strokeStyle = "rgba(0,100,160,0.1)";
-foreground.lineWidth = 1.7;
+foreground.lineWidth = 0.5;
 foreground.fillText("Loading...", w / 2, h / 2);
 
 // Highlight canvas for temporary interactions
@@ -86,7 +86,7 @@ highlighted.lineWidth = 4;
 // Background canvas
 background = document.getElementById('background').getContext('2d');
 background.strokeStyle = "rgba(0,100,160,0.1)";
-background.lineWidth = 1.7;
+background.lineWidth = 1;
 
 // SVG for ticks, labels, and interactions
 var svg = d3.select("#parallelSVG")
@@ -704,7 +704,7 @@ function brush() {
 function paths(selected, ctx, count) {
     var n = selected.length,
         i = 0,
-        opacity = d3.min([2 / Math.pow(n, 0.2), 1]),
+        opacity = d3.min([2 / Math.pow(n, 0.1), 1]),
         timer = (new Date()).getTime();
 
     selection_stats(opacity, n, data.length)

@@ -68,8 +68,8 @@ function loadNewData() {
 }
 
 function draw(data){
-    var width = 1560;
-    var height = 500;
+    var width = 1770;
+    var height = 590;
 
     cloudSvg.selectAll("*").remove();
     if(!data || data.length == 0){
