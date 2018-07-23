@@ -31,7 +31,7 @@ var nodes=[], links=[];
 var force = d3.layout.force()
     .gravity(0.1)
     .distance(50)
-    .charge(-23)
+    .charge(-70)
     .size([height+60, height]);
  
 
@@ -65,7 +65,7 @@ function processNetwork(data_) {
 
         // Process vendors *******************************************************************
         var listPreNodes1 = [];
-        if (d.cve.affects.vendor.vendor_data && d.cve.affects.vendor.vendor_data.length > 0) {
+        if (d.cve.affects.vendor.vendor_data && d.cve.affects.vendor.vendor_data.length > 1) {
             // if (d.cve.affects.vendor.vendor_data.length>1){//  && .cve.affects.vendor.vendor_data.length>2;})){
             for (var k = 0; k < d.cve.affects.vendor.vendor_data.length; k++) {
                 var item = d.cve.affects.vendor.vendor_data[k];
@@ -109,6 +109,7 @@ function processNetwork(data_) {
                 }
                 listPreNodes1.push(obj);
 
+                /*
 
                 // Process products *******************************************************************
                 if (item.product && item.product.product_data) {
@@ -148,6 +149,7 @@ function processNetwork(data_) {
                             links[indexL].count++;
                     }
                 }
+                */
             }
         }
 
@@ -222,7 +224,7 @@ function drawNetwork() {
         .enter().append("line")
         .attr("class", "link")
         .attr('stroke-width', function(d){
-            return 0.3+Math.pow(d.count-1,0.3);
+            return 1+Math.pow(d.count-1,0.5);
         })
         .attr('stroke-opacity', 0.5)
         .attr('stroke', function (d) {
