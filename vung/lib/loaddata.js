@@ -172,8 +172,8 @@ function loadCloudData(viewOption, draw) {
 }
 
 function loadISPCloudData(viewOption, draw){
-    // let fileName = "../data/isp1.json";
-    let fileName = "../data/allCVEs.json";
+    let fileName = "../data/isp1.json";
+    // let fileName = "../data/allCVEs.json";
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
         cves = rawData;

@@ -1,9 +1,11 @@
 var interpolation = "basis";
 var placed = true;
-let maxFontSize = 40;
-let minFontSize = 8;
+let maxFontSize = 24;
+let minFontSize = 4;
 let rotateCorner = 15;
-let backgroundOpacity = 0.2;
+let backgroundOpacity = 0.3;
+let timeStepFontSize = 10;
+let timeStepFontFamily = 'serif';
 var cloudSvg = d3.select("#theCloud").append('svg').attr({
     id: "mainsvg"
 });
@@ -72,7 +74,7 @@ function loadNewData() {
 function draw(data){
     let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
     var width = 1770;
-    var height = 590;
+    var height = 550;
 
     cloudSvg.selectAll("*").remove();
     if(!data || data.length == 0){
@@ -149,8 +151,7 @@ function draw(data){
         });
     });
     var c20 = d3.scale.category20b();
-    //Color based on the topic
-    var topicColorMap = d3.scale.ordinal().domain(topics).range(c20.range());
+
     //Color based on term
     var terms = [];
     for(let i=0; i< allWords.length; i++){
@@ -168,8 +169,6 @@ function draw(data){
     .attr({
         'font-family': 'Impact',
         'font-size': function(d){return d.fontSize;},
-        //fill: function(d){return topicColorMap(d.topic);},
-        //fill: function(d, i){return color(i);},
         fill: function(d, i){return termColorMap(d.text);},
         'text-anchor': 'middle',
         'alignment-baseline': 'middle',
@@ -333,10 +332,14 @@ function styleAxis(axisNodes){
         fill: 'none',
     });
     axisNodes.selectAll('.tick text').attr({
-        'font-family': 'serif',
-        'font-size': 10
+        'font-family': timeStepFontFamily,
+        'font-size': timeStepFontSize
     });
+    //Check if the
+    let x = $('.tick text');
+    console.log(x);
 }
+
 function styleGridlineNodes(gridlineNodes){
     gridlineNodes.selectAll('.domain').attr({
         fill: 'none',
