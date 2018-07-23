@@ -171,24 +171,25 @@ function loadCloudData(viewOption, draw) {
     });
 }
 
-function loadISPData(viewOption, draw){
-    let fileName = "data/isp1.json";
+function loadISPCloudData(viewOption, draw){
+    // let fileName = "../data/isp1.json";
+    let fileName = "../data/allCVEs.json";
     d3.json(fileName, function (error, rawData) {
         if (error) throw error;
         cves = rawData;
-        //Filter date
-        let year1 = new Date(2010 + '-01-01T00:00Z');
-        let year2 = new Date((2018 + 1) + '-01-01T00:00Z');
-        //Filter by date
-        cves = cves.filter(d => {
-            let date = new Date(d[dateType]);
-            return (date >= year1) && (date < year2);
-        });
+        // //Filter date
+        // let year1 = new Date(2010 + '-01-01T00:00Z');
+        // let year2 = new Date((2018 + 1) + '-01-01T00:00Z');
+        // //Filter by date
+        // cves = cves.filter(d => {
+        //     let date = new Date(d[dateType]);
+        //     return (date >= year1) && (date < year2);
+        // });
         loadCloudCVEs(viewOption, draw);
     });
 }
 function loadISPData(){
-    loadISPData("vendors", draw)
+    loadISPCloudData("vendors", draw)
 }
 
 function loadData(){

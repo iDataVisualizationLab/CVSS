@@ -21,7 +21,7 @@
 <button onclick="loadISPData.call(this, event)">Load ISP data</button>
 <input type="text" id="cveYear"/><button onclick="loadData.call(this, event)">Load Year data</button>
 <div id="holder1" class="holder1">
-    <select id="viewTypeSelect" class="styled-select" onchange="loadNewCVEs.call(this, event)"></select>
+    <select id="viewTypeSelect" class="styled-select" onchange="loadNewCVEs.call(this, event)" style="visibility: hidden;"></select>
 </div>
 <div id="theCloud"></div>
 <div id="jsviewer" style="visibility: hidden;position: absolute;">
