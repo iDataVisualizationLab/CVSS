@@ -6,6 +6,7 @@ let rotateCorner = 15;
 let backgroundOpacity = 0.3;
 let timeStepFontSize = 10;
 let timeStepFontFamily = 'serif';
+
 var cloudSvg = d3.select("#theCloud").append('svg').attr({
     id: "mainsvg"
 });
@@ -82,7 +83,7 @@ function draw(data){
     }
     //Layout data
     var axisPadding = 0;
-    var margins = {left: 40, top: 0, right: 0, bottom: 20};
+    var margins = {left: 40, top: 0, right: 0, bottom: 40};
     var ws = d3.layout.wordStream()
     .size([width, height*1.1])
     .interpolate(interpolation)
@@ -323,36 +324,54 @@ function draw(data){
         dx: 8
     });
     // spinner.stop();
+    function styleAxis(axisNodes){
+        axisNodes.selectAll('.domain').attr({
+            fill: 'none'
+        });
+        axisNodes.selectAll('.tick line').attr({
+            fill: 'none',
+        });
+        let texts = axisNodes.selectAll('.tick text').attr({
+            'font-family': timeStepFontFamily,
+            'font-size': timeStepFontSize
+        });
+
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext('2d');
+        ctx.font = timeStepFontSize + "px " + timeStepFontFamily;
+        let maxTextWidth = 0;
+        let maxTextHeight = timeStepFontSize;
+        texts[0].forEach(t=>{
+            let textWidth = ctx.measureText(t.innerHTML).width;
+            if(textWidth > maxTextWidth) maxTextWidth = textWidth;
+        });
+        //Data length
+        let dataLength = boxes.data.length;
+        //Available space per data item.
+        let availableSpace = width/dataLength;
+        if(availableSpace < maxTextWidth){
+            //Rotate the text
+            let rotateDeg = Math.atan(maxTextHeight / availableSpace)*180;
+            texts.attr({
+                'transform': `rotate(${rotateDeg})`
+            })
+        }
+
+    }
+    function styleGridlineNodes(gridlineNodes){
+        gridlineNodes.selectAll('.domain').attr({
+            fill: 'none',
+            stroke: 'none'
+        });
+        gridlineNodes.selectAll('.tick line').attr({
+            fill: 'none',
+            'stroke-width': 0.7,
+            stroke: 'lightgray'
+        });
+    }
+
+    function color(d,a) {
+        var c = colors[d];
+        return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
+    }
 };
-function styleAxis(axisNodes){
-    axisNodes.selectAll('.domain').attr({
-        fill: 'none'
-    });
-    axisNodes.selectAll('.tick line').attr({
-        fill: 'none',
-    });
-    axisNodes.selectAll('.tick text').attr({
-        'font-family': timeStepFontFamily,
-        'font-size': timeStepFontSize
-    });
-    //Check if the
-    let x = $('.tick text');
-    console.log(x);
-}
-
-function styleGridlineNodes(gridlineNodes){
-    gridlineNodes.selectAll('.domain').attr({
-        fill: 'none',
-        stroke: 'none'
-    });
-    gridlineNodes.selectAll('.tick line').attr({
-        fill: 'none',
-        'stroke-width': 0.7,
-        stroke: 'lightgray'
-    });
-}
-
-function color(d,a) {
-    var c = colors[d];
-    return ["hsla(",c[0],",",c[1],"%,",c[2],"%,",a,")"].join("");
-}
