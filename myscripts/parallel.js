@@ -2,11 +2,12 @@
 // Copyright (c) 2012, Kai Chang
 // Released under the BSD License: http://opensource.org/licenses/BSD-3-Clause
 
-var width = document.body.clientWidth,
-    height = 600;
+// var width = document.body.clientWidth;
+var width = 1770;
+var height = 600;
 
 var m = [35, 0, 10, height],
-    w = width - m[1] - m[3]+80,
+    w = width,
     h = height - m[0] - m[2],
     xscale = d3.scale.ordinal().rangePoints([0, w], 1),
     yscale = {},
@@ -61,14 +62,14 @@ function rgbToHsl(r, g, b) {
     return [h, s, l];
 }
 
-// Scale chart and canvas height
+// Scale chart and canvas 
 d3.select("#chart")
     .style("height", (h + m[0] + m[2]) + "px")
 
 d3.selectAll("canvas")
     .attr("width", w)
     .attr("height", h)
-    .style("padding", m.join("px ") + "px");
+    .style("padding", m.slice(0, 3).join("px ") + "0px");
 
 
 // Foreground canvas for primary view
@@ -90,15 +91,15 @@ background.lineWidth = 1;
 
 // SVG for ticks, labels, and interactions
 var svg = d3.select("#parallelSVG")
-    .attr("width", w + m[1] + m[3])
-    .attr("height", h + m[0] + m[2])
+    .attr("width", w)
+    .attr("height", h+m[0])
     .append("svg:g")
-    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+    .attr("transform", "translate(" + 0 + "," + m[0] + ")");
 
 // Load the data and visualization
-//d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 CVEs
+d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 CVEs
 //d3.json("data/nvdcve-1.0-2016.json", function(raw_data) {
-d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
+// d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 //d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
 
     // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
@@ -849,51 +850,51 @@ function export_csv() {
 
 // scale to window size
 window.onresize = function () {
-    width = document.body.clientWidth,
-        height = d3.max([document.body.clientHeight - 500, 220]);
-
-    w = width - m[1] - m[3],
-        h = height - m[0] - m[2];
-
-    d3.select("#chart")
-        .style("height", (h + m[0] + m[2]) + "px")
-
-    d3.selectAll("canvas")
-        .attr("width", w)
-        .attr("height", h)
-        .style("padding", m.join("px ") + "px");
-
-    d3.select("#parallelSVG")
-        .attr("width", w + m[1] + m[3])
-        .attr("height", h + m[0] + m[2])
-        .select("g")
-        .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
-
-    xscale = d3.scale.ordinal().rangePoints([0, w], 1).domain(dimensions);
-    dimensions.forEach(function (d) {
-        yscale[d].range([h, 0]);
-    });
-
-    d3.selectAll(".dimension")
-        .attr("transform", function (d) {
-            return "translate(" + xscale(d) + ")";
-        })
-    // update brush placement
-    d3.selectAll(".brush")
-        .each(function (d) {
-            d3.select(this).call(yscale[d].brush = d3.svg.brush().y(yscale[d]).on("brush", brush));
-        })
-    brush_count++;
-
-    // update axis placement
-    axis = axis.ticks(1 + height / 50),
-        d3.selectAll(".axis")
-            .each(function (d) {
-                d3.select(this).call(axis.scale(yscale[d]));
-            });
-
-    // render data
-    brush();
+    // width = document.body.clientWidth,
+    //     height = d3.max([document.body.clientHeight - 500, 220]);
+    //
+    // w = width - m[1] - m[3],
+    //     h = height - m[0] - m[2];
+    //
+    // d3.select("#chart")
+    //     .style("height", (h + m[0] + m[2]) + "px")
+    //
+    // d3.selectAll("canvas")
+    //     .attr("width", w)
+    //     .attr("height", h)
+    //     .style("padding", m.join("px ") + "px");
+    //
+    // d3.select("#parallelSVG")
+    //     .attr("width", w )
+    //     .attr("height", h)
+    //     .select("g");
+    //     //.attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+    //
+    // xscale = d3.scale.ordinal().rangePoints([0, w], 1).domain(dimensions);
+    // dimensions.forEach(function (d) {
+    //     yscale[d].range([h, 0]);
+    // });
+    //
+    // d3.selectAll(".dimension")
+    //     .attr("transform", function (d) {
+    //         return "translate(" + xscale(d) + ")";
+    //     })
+    // // update brush placement
+    // d3.selectAll(".brush")
+    //     .each(function (d) {
+    //         d3.select(this).call(yscale[d].brush = d3.svg.brush().y(yscale[d]).on("brush", brush));
+    //     })
+    // brush_count++;
+    //
+    // // update axis placement
+    // axis = axis.ticks(1 + height / 50),
+    //     d3.selectAll(".axis")
+    //         .each(function (d) {
+    //             d3.select(this).call(axis.scale(yscale[d]));
+    //         });
+    //
+    // // render data
+    // brush();
 };
 
 // Remove all but selected from the dataset

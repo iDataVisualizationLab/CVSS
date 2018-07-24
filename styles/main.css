@@ -1,16 +1,54 @@
 .roundedBorder{
-
+  box-shadow: 5px 5px 5px #444;
+  background-image: -webkit-linear-gradient(left, #fefefe, #eeeeee);
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  -moz-border-radius: 9px;
+  -webkit-border-radius: 9px ;
+  transform-origin: 100% 100% 0;
+  -webkit-transform-origin: 100% 100% 0;
+  -ms-transform-origin: 100% 100% 0;
+  height: 600px;
+}
+#wrap {
+  position: absolute;
+  padding: 0 1%;
+  top: 50px;
+  left: 1800px;
+  height: 600px;
+  width: 690px;
+  overflow: scroll;
+}
+svg {
+  font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
+}
+canvas, svg {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#chart {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  width: 1770px;
+  height: 600px;
 }
 
+#chart2 {
+  position: absolute;
+  top: 670px;
+  left: 10px;
+  width: 1770px;
 
+}
 #networkPanel{
   position:absolute;
-  background-color: rgba(255,255,255, 1);
-  border-radius: 25px;
-  left:10px;
-  top:40px;
-}
+  left:1800px;
+  top: 670px;
+  width: 740px;
 
+}
 #button1{
   position:absolute;
   left:14px;
@@ -20,3 +58,4 @@
   border-radius: 1px;
   box-shadow: 1px 1px 1px #444;
 }
+

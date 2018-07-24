@@ -75,7 +75,7 @@ function loadNewData() {
 function draw(data){
     let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
     var width = 1770;
-    var height = 550;
+    var height = 460;
 
     cloudSvg.selectAll("*").remove();
     if(!data || data.length == 0){
@@ -83,7 +83,7 @@ function draw(data){
     }
     //Layout data
     var axisPadding = 0;
-    var margins = {left: 40, top: 0, right: 0, bottom: 40};
+    var margins = {left: 0, top: 0, right: 0, bottom: 40};
     var ws = d3.layout.wordStream()
     .size([width, height*1.1])
     .interpolate(interpolation)

@@ -21,26 +21,6 @@ a {
 .dark a {
 	color: #5ae;
 }
-#wrap {
-	padding: 0 1%;
-}
-svg {
-	font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
-}
-canvas, svg {
-	position: absolute;
-	top: 0;
-	left: 0;
-}
-#chart {
-	position: relative;
-}
-
-#chart2 {
-	position: relative;
-	top: 5px;
-	left: 0px;
-}
 
 
 .brush rect.extent {
@@ -70,7 +50,7 @@ canvas, svg {
 .axis line, .axis path {
 	fill: none;
 	stroke: #777;
-	stroke-width: 1;
+	stroke-width: 1px;
 }
 .dark .axis line, .dark .axis path {
 	stroke: #777;
@@ -80,7 +60,7 @@ canvas, svg {
 }
 .axis text {
 	fill: #111;
-	text-anchor: right;
+	text-anchor: end;
 	font-size: 11px;
 	text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 }
@@ -100,11 +80,11 @@ canvas, svg {
 	float: left;
 }
 .quarter {
-	width: 12%;
+	width: 50%;
 	margin: 0 0%;
 }
 .third {
-	width: 18%;
+	width: 50%;
 	margin: 0 0%;
 }
 .half {

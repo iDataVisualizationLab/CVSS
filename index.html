@@ -4,7 +4,7 @@
 <html>
 <head>
     <link rel="icon" type="image/gif"
-          href="images/b.png" />
+          href="images/b.png"/>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     <title>CVExplorer</title>
     <link rel="stylesheet" type="text/css" href="styles/parallel.css"/>
@@ -44,15 +44,13 @@
     </div>
     <div style="clear:both;"></div>
 </div>
-<div id="chart">
+<div id="chart" class="roundedBorder">
     <canvas id="background"></canvas>
     <canvas id="foreground"></canvas>
     <canvas id="highlight"></canvas>
     <svg id="parallelSVG"></svg>
 </div>
-
-
-<div id="wrap">
+<div id="wrap" class="roundedBorder">
     <div class="quarter" id="controls">
         <h3>NVD Vulnerability Severity Ratings</h3>
         <p id="legend">
@@ -82,32 +80,28 @@
         </div>
 
     </div>
-
     <div class="third">
         <h3>Sample of 40 entries <input type="text" id="search" placeholder="Search CVSS..."></input></h3>
         <p id="food-list">
         </p>
     </div>
+</div>
 
-    <div class="half">
-        <div id="chart2">
-            <div id="holder1" class="holder1">
-                 <h3>Select topic for WordStream</h3>
-          <select id="viewTypeSelect" class="styled-select" onchange="loadNewCVEs.call(this, event)"></select>
-            </div>
-            <div id="theCloud"></div>
-            <div id="jsviewer" style="visibility: hidden;position: relative;">
+
+<div id="chart2" class="roundedBorder">
+    <div id="holder1" class="holder1">
+        <h3>Select topic for WordStream</h3>
+        <select id="viewTypeSelect" class="styled-select" onchange="loadNewCVEs.call(this, event)"></select>
+    </div>
+    <div id="theCloud"></div>
+    <div id="jsviewer" style="visibility: hidden;position: relative;">
                 <pre id="json-renderer"
                      style=" border: 1px solid #aaa; padding: 0.5em 1.5em; font-family: sans-serif;"></pre>
-            </div>
-        </div>
     </div>
 </div>
 
 
-<div id="networkPanel" class="roundedBorder">
-
-</div>
+<div id="networkPanel" class="roundedBorder"></div>
 
 
 </body>
