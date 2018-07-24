@@ -58,3 +58,18 @@ canvas, svg {
   box-shadow: 1px 1px 1px #444;
 }
 
+.quarter, .third, .half {
+  float: left;
+}
+.quarter {
+  width: 40%;
+  margin: 0 0%;
+}
+.third {
+  width: 60%;
+  margin: 0 0%;
+}
+.half {
+  width: 70%;
+  margin: 0 0%;
+}

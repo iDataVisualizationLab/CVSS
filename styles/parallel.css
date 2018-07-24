@@ -76,21 +76,7 @@ a {
 .dark .axis text.label {
 	fill: #ddd;
 }
-.quarter, .third, .half {
-	float: left;
-}
-.quarter {
-	width: 50%;
-	margin: 0 0%;
-}
-.third {
-	width: 50%;
-	margin: 0 0%;
-}
-.half {
-	width: 70%;
-	margin: 0 0%;
-}
+
 h3 {
 	margin: 12px 0 9px;
 }
