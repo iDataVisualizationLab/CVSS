@@ -29,10 +29,10 @@ var  svgNetwork = d3.select("#networkPanel")
 var nodes=[], links=[];
 
 var force = d3.layout.force()
-    .gravity(0.1)
+    .gravity(0.18)
     .distance(50)
     .charge(-70)
-    .size([height+60, height]);
+    .size([height+140, height]);
  
 
 
@@ -213,10 +213,18 @@ function processNetwork(data_) {
 
 function drawNetwork() {
     svgNetwork.selectAll("*").remove();
+    let maxLinkCount = d3.max(links.map(d=>1+Math.pow(d.count-1,0.5)));
+    let forceStrengthScale = d3.scale.linear().domain([0, maxLinkCount]).range([0.2, 0.8]);
 
     force
         .nodes(nodes)
         .links(links)
+        .linkStrength((d)=>{
+            if(!d.count) d.count = 0;
+            let linkForceStrength = forceStrengthScale(d.count);
+            console.log(linkForceStrength);
+            return linkForceStrength;
+        })
         .start();
 
     var link = svgNetwork.selectAll(".link")
