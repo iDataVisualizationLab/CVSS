@@ -208,12 +208,35 @@ function modifiedCVEsToOriginalCVEs(theCves) {
     return theCves.map(d => d['originalCVE']);
 }
 
+
+function processViewOptions(data) {
+    //Only do it if we haven't got the counts
+    if (!cloudViewOptions[0].count) {
+        //Only load the data for the first time.
+        //data
+        let allText = [];
+        data.forEach(timeStep => {
+            allText = allText.concat(_.flatten(d3.values(timeStep.topics).map(topic => topic.text)));
+        });
+        cloudViewOptions.forEach(viewOption => {
+            let count = 0;
+            allText.forEach(text => {
+                if (text.type === viewOption.key) {
+                    count = count + 1;
+                }
+            });
+            viewOption.count = count;
+        });
+        //Create the legend for the first time. Next we will only update the view + call the loadCloudCVEs again.
+        let termSelector = new TermSelector("viewTypeSelect", cloudViewOptions, loadCloudCVEs);
+        termSelector.create_legend();
+    }
+}
 function loadCloudCVEs(viewOptions, draw) {
     if (!cves || cves.length == 0) {
         draw(null);
         return;
     }
-    //Filter data in a year
     let monthFormat = d3.time.format('%b %Y');
     var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
     data = data.map(d => {
@@ -284,25 +307,7 @@ function loadCloudCVEs(viewOptions, draw) {
     //TODO: This is a quick fix => trick by calculating this for the first time => so if first time we do not load 4 options => need to do this calculation separately.
     //Calculate the view options if it is not calculated.
     //For the first time it will load all four view options and also it will not have count frequencies => so we will calculate this
-    if (!cloudViewOptions[0].count) {
-        //data
-        let allText = [];
-        data.forEach(timeStep => {
-            allText = allText.concat(_.flatten(d3.values(timeStep.topics).map(topic => topic.text)));
-        });
-        cloudViewOptions.forEach(viewOption => {
-            let count = 0;
-            allText.forEach(text=>{
-               if(text.type=== viewOption.key){
-                   count = count+1;
-               }
-            });
-            viewOption.count = count;
-        });
-        //Create the legend for the first time. Next we will only update the view + call the loadCloudCVEs again.
-        let termSelector = new TermSelector("viewTypeSelect", cloudViewOptions, loadCloudCVEs);
-        termSelector.create_legend();
-    }
+    processViewOptions(data);
     draw(data);
 }
 
