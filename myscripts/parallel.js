@@ -691,7 +691,7 @@ function brush() {
 
     //Vung's word cloud
     cves = modifiedCVEsToOriginalCVEs(selected);
-    loadCloudCVEs(getViewOption(), draw);
+    loadCloudCVEs(cloudViewOptions.map(d=>d.key), draw);
 
     // Tommy 2018, NETWORK     **************************************
     processNetwork(selected);
