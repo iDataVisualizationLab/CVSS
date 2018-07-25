@@ -99,16 +99,58 @@ var svg = d3.select("#parallelSVG")
 // Load the data and visualization
 // d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 CVEs
 //d3.json("data/nvdcve-1.0-2016.json", function(raw_data) {
-d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
+//d3.json("data2/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 //d3.json("data/nvdcve-1.0-2018.json", function(raw_data) {
+d3.json("data/isp1.json", function(raw_data) {
 
     // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
     // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
     //    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
-
+    
 
     data = [];
-    for (var i = 0; i < raw_data.CVE_Items.length; i++) {
+    for (var i = 0; i < raw_data.length; i++) {
+        var d = raw_data[i].impact.baseMetricV3;
+        if (d != undefined) {
+            var obj = {};
+            if (raw_data[i].cve == undefined)
+                obj.name = "";
+
+            else
+                obj.name = raw_data[i].cve.description.description_data[0].value;
+            obj.group = d.cvssV3.baseSeverity;
+
+            // obj._id = data.length;
+            obj.cve = raw_data[i].cve;
+            obj.originalCVE = raw_data[i];
+            obj.impactScore = d.impactScore;
+            obj.exploitabilityScore = d.exploitabilityScore;
+            obj.baseScore = d.cvssV3.baseScore;
+            data.push(obj);
+        }
+        else if (raw_data[i].impact.baseMetricV2.cvssV2) {
+            var obj = {};
+            if (raw_data[i].cve == undefined)
+                obj.name = "";
+
+            else
+                obj.name = raw_data[i].cve.description.description_data[0].value;
+            obj.group = raw_data[i].impact.baseMetricV2.cvssV2.accessComplexity;
+
+            // obj._id = data.length;
+            obj.cve = raw_data[i].cve;
+            obj.originalCVE = raw_data[i];
+            obj.impactScore = raw_data[i].impact.baseMetricV2.impactScore;
+            obj.exploitabilityScore = raw_data[i].impact.baseMetricV2.exploitabilityScore;
+            obj.baseScore = raw_data[i].impact.baseMetricV2.cvssV2.baseScore;
+            data.push(obj);
+        }
+        else{
+            debugger;
+        }
+    }
+
+  /*  for (var i = 0; i < raw_data.CVE_Items.length; i++) {
         var d = raw_data.CVE_Items[i].impact.baseMetricV3;
         if (d != undefined) {
             var obj = {};
@@ -127,10 +169,11 @@ d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVE
             obj.baseScore = d.cvssV3.baseScore;
             data.push(obj);
         }
-    }
+    }*/
 
     // network *************************************************************************************************
     processNetwork();
+
 
     // Compute vendor order for Parallel Coordinates *****************************************************************************
     var data2 = [];
@@ -258,7 +301,7 @@ d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVE
             d.vulnerability_type = listProblem[d.problemNode.name].order;
         }
     });
-
+    
 
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {

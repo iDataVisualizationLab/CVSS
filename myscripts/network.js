@@ -23,7 +23,7 @@ function colorNetwork(type) {
 
 var  svgNetwork = d3.select("#networkPanel")
     .append("svg")
-    .attr("width", height+140)
+    .attr("width", height+100)
     .attr("height",height);
 
 var nodes=[], links=[];
@@ -47,7 +47,7 @@ function isContainedName(a, name) {
     return -1;
 }
 function getNodeSize(d) {
-   return  2+ Math.pow(d.data.length,0.3);
+   return  2+ Math.pow(d.data.length,0.4);
 }
 
 function processNetwork(data_) {
@@ -65,8 +65,7 @@ function processNetwork(data_) {
 
         // Process vendors *******************************************************************
         var listPreNodes1 = [];
-        if (d.cve.affects.vendor.vendor_data && d.cve.affects.vendor.vendor_data.length > 1) {
-            // if (d.cve.affects.vendor.vendor_data.length>1){//  && .cve.affects.vendor.vendor_data.length>2;})){
+        if (d.cve.affects.vendor.vendor_data && d.cve.affects.vendor.vendor_data.length > 0) {
             for (var k = 0; k < d.cve.affects.vendor.vendor_data.length; k++) {
                 var item = d.cve.affects.vendor.vendor_data[k];
                 var name = item.vendor_name;
@@ -109,7 +108,7 @@ function processNetwork(data_) {
                 }
                 listPreNodes1.push(obj);
 
-                /*
+
 
                 // Process products *******************************************************************
                 if (item.product && item.product.product_data) {
@@ -149,7 +148,7 @@ function processNetwork(data_) {
                             links[indexL].count++;
                     }
                 }
-                */
+
             }
         }
 
@@ -205,8 +204,15 @@ function processNetwork(data_) {
             link.source = listPreNodes1[0];
             link.target = listPreNodes2[0];
             link.name = listPreNodes1[0].name + "_" + listPreNodes2[0].name;
-               links.push(link);
+            var indexL = isContainedName(links, link.name);
+            if (indexL < 0) {
+                link.count = 1;
+                links.push(link);
+            }
+            else
+                links[indexL].count++;
         }
+
     });
 }
 
@@ -215,6 +221,30 @@ function drawNetwork() {
     svgNetwork.selectAll("*").remove();
     let maxLinkCount = d3.max(links.map(d=>1+Math.pow(d.count-1,0.5)));
     let forceStrengthScale = d3.scale.linear().domain([0, maxLinkCount]).range([0.2, 0.8]);
+
+
+
+    // Filet by Link count *****************
+    links = links.filter(function (l) {
+        return l.count>=5;
+    })
+    // Remove SINGLE nodes  **************************************************
+    var str =" "
+    for (var i=0; i< links.length;i++){
+        var id1 = links[i].source.name;
+        if (str.indexOf(" "+id1+" ") <0 )
+            str+=id1 +" ";
+        var id2 = links[i].target.name;
+        if (str.indexOf(" "+id2+" ") <0 )
+            str+=id2 +" ";
+    }
+
+    console.log("Str=" +str);
+
+    nodes = nodes.filter(function(d){
+        return str.indexOf(" "+d.name+" ")>=0;
+    })
+
 
     force
         .nodes(nodes)
@@ -232,7 +262,7 @@ function drawNetwork() {
         .enter().append("line")
         .attr("class", "link")
         .attr('stroke-width', function(d){
-            return 1+Math.pow(d.count-1,0.5);
+            return 0+Math.pow(d.count-1,0.3);
         })
         .attr('stroke-opacity', 0.5)
         .attr('stroke', function (d) {
@@ -261,13 +291,19 @@ function drawNetwork() {
 
     
     node.append("text")
-        .attr("dx", -18)
-        .attr("dy", 8)
-        .style("font-family", "overwatch")
-        .style("font-size", "18px")
-
+        .attr("dx", 0)
+        .attr("dy", function (d) {
+              return  -getNodeSize(d)-2;
+        })
+        .style("text-anchor","middle")
+        .style("text-shadow", "1px 1px 0 rgba(255, 255, 255, 0.6")
+        //.style("font-weight", function(d) { return d.isSearchTerm ? "bold" : ""; })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", function(d) {
+          return 8+ getNodeSize(d)/1.7;
+        })
         .text(function (d) {
-            return "";//d.name
+            return d.name
         });
 
     force.on("tick", function () {
