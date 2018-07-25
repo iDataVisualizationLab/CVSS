@@ -239,8 +239,6 @@ function drawNetwork() {
             str+=id2 +" ";
     }
 
-    console.log("Str=" +str);
-
     nodes = nodes.filter(function(d){
         return str.indexOf(" "+d.name+" ")>=0;
     })
