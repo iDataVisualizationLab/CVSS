@@ -222,7 +222,6 @@ function drawNetwork() {
         .linkStrength((d)=>{
             if(!d.count) d.count = 0;
             let linkForceStrength = forceStrengthScale(d.count);
-            console.log(linkForceStrength);
             return linkForceStrength;
         })
         .start();

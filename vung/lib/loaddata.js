@@ -22,6 +22,7 @@ let criticalOrder = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 let stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"];
 let removeWords = ["object", "Object", "", " ", '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'via', 'can', 'vulnerability', 'allows', 'allow', 'access'];
 stopWords = stopWords.concat(removeWords);
+
 function removeStopWords(words, stopWords) {
     let result = [];
     words.forEach(w => {
@@ -38,21 +39,23 @@ function removeStopWords(words, stopWords) {
     result = result1;
     return result;
 }
+
 //</editor-fold>
 
 //<editor-fold desc="extracting data">
 let extractors = {
-    'vendors': vendorExtractor,
-    'problemTypes': problemTypeExtractor,
-    'descriptions': descriptionExtractor,
-    'products': productExtractor
+    'vendor': vendorExtractor,
+    'vulnerability_type': problemTypeExtractor,
+    'description': descriptionExtractor,
+    'product': productExtractor
 }
 let cveTermExtractors = {
-    'vendors': cveVendorExtractor,
-    'problemTypes': cveProblemTypeExtractor,
-    'descriptions': cveDescriptionExtractor,
-    'products': cveProductExtractor
+    'vendor': cveVendorExtractor,
+    'vulnerability_type': cveProblemTypeExtractor,
+    'description': cveDescriptionExtractor,
+    'product': cveProductExtractor
 }
+
 function baseSeverityExtractor(d) {
     return accessChain(d, baseSeverityAccessChain) ? accessChain(d, baseSeverityAccessChain) : accessChain(d, baseSeverityAccessChainV2);
 }
@@ -132,6 +135,7 @@ function productExtractor(d) {
     });
     return products;
 }
+
 //</editor-fold>
 
 let cves = null;
@@ -171,7 +175,7 @@ function loadCloudData(viewOption, draw) {
     });
 }
 
-function loadISPCloudData(viewOption, draw){
+function loadISPCloudData(viewOption, draw) {
     let fileName = "../data/isp1.json";
     // let fileName = "../data/allCVEs.json";
     d3.json(fileName, function (error, rawData) {
@@ -188,22 +192,24 @@ function loadISPCloudData(viewOption, draw){
         loadCloudCVEs(viewOption, draw);
     });
 }
-function loadISPData(){
+
+function loadISPData() {
     loadISPCloudData("vendors", draw)
 }
 
-function loadData(){
+function loadData() {
     year = +$("#cveYear").val();
     fileName = "nvdcve-1.0-" + year;
-    fileName = "../data/"+fileName +".json";
+    fileName = "../data/" + fileName + ".json";
     loadCloudData("vendors", draw);
 }
-function modifiedCVEsToOriginalCVEs(theCves){
-    return theCves.map(d=>d['originalCVE']);
+
+function modifiedCVEsToOriginalCVEs(theCves) {
+    return theCves.map(d => d['originalCVE']);
 }
 
-function loadCloudCVEs(viewOption, draw) {
-    if(!cves || cves.length == 0){
+function loadCloudCVEs(viewOptions, draw) {
+    if (!cves || cves.length == 0) {
         draw(null);
         return;
     }
@@ -219,30 +225,34 @@ function loadCloudCVEs(viewOption, draw) {
         let topics = nestedTopics.map(d => {
             let frequency = d.values.length;
             let key = d.key;
-            let text;
-            let allTerms = extractors[viewOption](d);
-            //Count frequencies
-            var counts = allTerms.reduce(function (obj, word) {
-                if (!obj[word]) {
-                    obj[word] = 0;
-                }
-                obj[word]++;
-                return obj;
-            }, {});
-            //Convert to array of objects
-            text = d3.keys(counts).map(function (d) {
-                return {
-                    text: d,
-                    frequency: counts[d],
-                    topic: key
-                }
-            }).sort(function (a, b) {//sort the terms by frequency
-                return b.frequency - a.frequency;
-            }).filter(function (d) {
-                return d.text;
-            });//filter out empty words
-            text = text.slice(0, Math.min(text.length, 45));
-
+            let text = [];
+            viewOptions.forEach(viewOption => {
+                let singleViewOptionText;
+                let allTerms = extractors[viewOption](d);
+                //Count frequencies
+                let counts = allTerms.reduce(function (obj, word) {
+                    if (!obj[word]) {
+                        obj[word] = 0;
+                    }
+                    obj[word]++;
+                    return obj;
+                }, {});
+                //Convert to array of objects
+                singleViewOptionText = d3.keys(counts).map(function (d) {
+                    return {
+                        text: d,
+                        frequency: counts[d],
+                        topic: key,
+                        type: viewOption
+                    }
+                }).sort(function (a, b) {//sort the terms by frequency
+                    return b.frequency - a.frequency;
+                }).filter(function (d) {
+                    return d.text;
+                });//filter out empty words
+                singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 45));
+                text = text.concat(singleViewOptionText);
+            });
             d[d.key] = {
                 text: text,
                 frequency: frequency
@@ -270,6 +280,28 @@ function loadCloudCVEs(viewOption, draw) {
     }).sort(function (a, b) {//sort by date
         return monthFormat.parse(a.date) - monthFormat.parse(b.date);
     });
+    //TODO: This is a quick fix => trick by calculating this for the first time => so if first time we do not load 4 options => need to do this calculation separately.
+    //Calculate the view options if it is not calculated.
+    //For the first time it will load all four view options and also it will not have count frequencies => so we will calculate this
+    if (!cloudViewOptions[0].count) {
+        //data
+        let allText = [];
+        data.forEach(timeStep => {
+            allText = allText.concat(_.flatten(d3.values(timeStep.topics).map(topic => topic.text)));
+        });
+        cloudViewOptions.forEach(viewOption => {
+            let count = 0;
+            allText.forEach(text=>{
+               if(text.type=== viewOption.key){
+                   count = count+1;
+               }
+            });
+            viewOption.count = count;
+        });
+        //Create the legend for the first time. Next we will only update the view + call the loadCloudCVEs again.
+        let termSelector = new TermSelector("viewTypeSelect", cloudViewOptions, loadCloudCVEs);
+        termSelector.create_legend();
+    }
     draw(data);
 }
 
