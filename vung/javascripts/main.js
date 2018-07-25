@@ -102,8 +102,10 @@ class TermSelector {
             });
     }
     handleTermSelector(){
+        //Remove all terms.
+        setTimeout(()=>{cloudSvg.selectAll("*").transition().duration(1000).style(10e-6).remove()}, 0);
         this.changeLegendDisplay();
-        this.handler(_.difference(this.options, this.excluded_groups).map(d=>d.key), draw);
+        setTimeout(()=>{this.handler(_.difference(this.options, this.excluded_groups).map(d=>d.key), draw);}, 0);
     }
 }
 let cloudViewOptions = [
@@ -173,8 +175,6 @@ function draw(data) {
     let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
     var width = 1765;
     var height = 460;
-
-    cloudSvg.selectAll("*").transition().duration(1000).style(10e-6).remove();
     if (!data || data.length == 0) {
         return;
     }
