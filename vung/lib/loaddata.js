@@ -208,7 +208,7 @@ function modifiedCVEsToOriginalCVEs(theCves) {
     return theCves.map(d => d['originalCVE']);
 }
 
-
+let termSelector;//put this as global since will use it in different place.
 function processViewOptions() {
     //Only do it if we haven't got the counts
     if (!cloudViewOptions[0].count) {
@@ -228,7 +228,7 @@ function processViewOptions() {
             viewOption.count = count;
         });
         //Create the legend for the first time. Next we will only update the view + call the loadCloudCVEs again.
-        let termSelector = new TermSelector("viewTypeSelect", cloudViewOptions, loadCloudCVEs);
+        termSelector = new TermSelector("viewTypeSelect", cloudViewOptions, loadCloudCVEs);
         termSelector.create_legend();
     }
 }

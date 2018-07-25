@@ -50,7 +50,7 @@ function getNodeSize(d) {
    return  2+ Math.pow(d.data.length,0.4);
 }
 
-function processNetwork(data_, groups) {
+function processNetwork(data_) {
     var networkData = undefined;
     if (data_==undefined)
         networkData = data;
@@ -104,11 +104,8 @@ function processNetwork(data_, groups) {
                     else {
                         links[indexL].count++;
                     }
-
                 }
                 listPreNodes1.push(obj);
-
-
 
                 // Process products *******************************************************************
                 if (item.product && item.product.product_data) {
@@ -227,7 +224,13 @@ function drawNetwork() {
     // Filet by Link count *****************
     links = links.filter(function (l) {
         return l.count>=5;
-    })
+    });
+    //Filter by visibleGroups
+    //if(viewing by description) then don't draw the network at all
+    let viewOptions = termSelector.getViewOptions();
+    if(_.contains(viewOptions, 'description')){
+        return;
+    }
     // Remove SINGLE nodes  **************************************************
     var str =" "
     for (var i=0; i< links.length;i++){
@@ -243,10 +246,15 @@ function drawNetwork() {
         return str.indexOf(" "+d.name+" ")>=0;
     })
 
+    //Filter the nodes which are not in the visible options
+    let filteredNodes = nodes.filter(n=>_.contains(viewOptions, n.type));
+    let filteredLinks = links.filter(l=>_.contains(viewOptions, l.source.type) && _.contains(viewOptions, l.target.type));
+    debugger
+    //Filter the links which are not in the visible options
 
     force
-        .nodes(nodes)
-        .links(links)
+        .nodes(filteredNodes)
+        .links(filteredLinks)
         .linkStrength((d)=>{
             if(!d.count) d.count = 0;
             let linkForceStrength = forceStrengthScale(d.count);
@@ -255,7 +263,7 @@ function drawNetwork() {
         .start();
 
     var link = svgNetwork.selectAll(".link")
-        .data(links)
+        .data(filteredLinks)
         .enter().append("line")
         .attr("class", "link")
         .attr('stroke-width', function(d){
@@ -270,7 +278,7 @@ function drawNetwork() {
         });    
 
     var node = svgNetwork.selectAll(".node")
-        .data(nodes)
+        .data(filteredNodes)
         .enter().append("g")
         .attr("class", "node")
         .call(force.drag);

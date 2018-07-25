@@ -34,7 +34,9 @@ class TermSelector {
         this.legend = null;
         this.handler = handler;
     }
-
+    getViewOptions(){
+        return _.difference(this.options, this.excluded_groups).map(d=>d.key);
+    }
     create_legend() {
         let self = this;
         // create legend
@@ -111,6 +113,8 @@ class TermSelector {
         //Remove all terms.
         this.changeLegendDisplay();
         this.handler(_.difference(this.options, this.excluded_groups).map(d => d.key), draw);
+        //Handle the network.
+        drawNetwork();
     }
 }
 
