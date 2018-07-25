@@ -209,11 +209,11 @@ function modifiedCVEsToOriginalCVEs(theCves) {
 }
 
 
-function processViewOptions(data) {
+function processViewOptions() {
     //Only do it if we haven't got the counts
     if (!cloudViewOptions[0].count) {
-        //Only load the data for the first time.
-        //data
+        //We count terms for all the options
+        let data = processCloudData(cloudViewOptions.map(d=>d.key));
         let allText = [];
         data.forEach(timeStep => {
             allText = allText.concat(_.flatten(d3.values(timeStep.topics).map(topic => topic.text)));
@@ -232,11 +232,8 @@ function processViewOptions(data) {
         termSelector.create_legend();
     }
 }
-function loadCloudCVEs(viewOptions, draw) {
-    if (!cves || cves.length == 0) {
-        draw(null);
-        return;
-    }
+
+function processCloudData(viewOptions) {
     let monthFormat = d3.time.format('%b %Y');
     var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
     data = data.map(d => {
@@ -304,10 +301,19 @@ function loadCloudCVEs(viewOptions, draw) {
     }).sort(function (a, b) {//sort by date
         return monthFormat.parse(a.date) - monthFormat.parse(b.date);
     });
+    return data;
+}
+
+function loadCloudCVEs(viewOptions, draw) {
+    if (!cves || cves.length == 0) {
+        draw(null);
+        return;
+    }
+    var data = processCloudData(viewOptions);
     //TODO: This is a quick fix => trick by calculating this for the first time => so if first time we do not load 4 options => need to do this calculation separately.
     //Calculate the view options if it is not calculated.
     //For the first time it will load all four view options and also it will not have count frequencies => so we will calculate this
-    processViewOptions(data);
+    processViewOptions();
     draw(data);
 }
 

@@ -5,11 +5,12 @@
     /*top: 94px;*/
     left: 70px;
     top: 10px;
-    width: 1800px;
+    width: 400px;
     height: 50px;
     border: 0px solid rgba(0,0,0, 1);
     font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
     font-size: 12px;
+    overflow: visible;
     
 } 
 .styled-select {

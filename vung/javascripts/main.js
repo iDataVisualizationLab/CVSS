@@ -29,7 +29,7 @@ fileName = "../data/" + fileName + ".json";
 class TermSelector {
     constructor(theId, options, handler) {
         this.theId = theId;
-        this.excluded_groups = [];
+        this.excluded_groups = cloudViewOptions.filter(d => d.key === 'description');//description is excluded by default
         this.options = options;
         this.legend = null;
         this.handler = handler;
@@ -38,23 +38,27 @@ class TermSelector {
     create_legend() {
         let self = this;
         // create legend
-        var legend_data = d3.select("#" + this.theId)
+        var legend_data = d3.select("#" + this.theId).style("width", "200px").style("overflow", "visible")
             .html("")
             .selectAll(".row")
             .data(this.options)
         // filter by group
         this.legend = legend_data
             .enter().append("div")
-            .attr("title", "Hide group")
+            .attr("title", "Toggle group")
             .style("width", "400px")//TODO: May need to make this dynamic
-            .on("click", function(d){
-                // toggle food group
-                if (_.contains(self.excluded_groups, d)) {
-                    d3.select(this).attr("title", "Hide group")
-                    self.excluded_groups = _.difference(self.excluded_groups, [d]);
-
-                } else {
-                    d3.select(this).attr("title", "Show group")
+            .on("click", function (d) {
+                // toggle group
+                if (_.contains(self.excluded_groups, d)) {//Enabling
+                    //If enabling description => then need to disable all the other groups.
+                    if(d.key==='description'){
+                        self.excluded_groups = _.difference(self.options, [d]);
+                    }else{//Just exclude the option only.
+                        self.excluded_groups = _.difference(self.excluded_groups, [d]);
+                        //If enabling other groups => then need to add description to the excluded group.
+                        self.excluded_groups = self.excluded_groups.concat(self.options.filter(d=>d.key==='description'));
+                    }
+                } else {//Disabling
                     self.excluded_groups.push(d);
                     //Handle data here
                 }
@@ -83,31 +87,33 @@ class TermSelector {
         this.changeLegendDisplay();
         return this.legend;
     }
-    changeLegendDisplay(){
-        let maxNumberOfTerms = d3.max(this.options.map(op=>op.count));
+
+    changeLegendDisplay() {
+        let maxNumberOfTerms = d3.max(this.options.map(op => op.count));
         this.legend
-            .style("text-decoration", d=> {
+            .style("text-decoration", d => {
                 return _.contains(this.excluded_groups, d) ? "line-through" : null;
             })
             .attr("class", "row");
 
         this.legend.selectAll(".color-bar")
             .style("width", d => {
-                return _.contains(this.excluded_groups, d) ? "0px": ~~(200*(d.count/maxNumberOfTerms)) + "px";
+                return _.contains(this.excluded_groups, d) ? "0px" : ~~(200 * (d.count / maxNumberOfTerms)) + "px";
             });
 
         this.legend.selectAll(".tally")
-            .text(d=> {
+            .text(d => {
                 return _.contains(this.excluded_groups, d) ? 0 : d.count;
             });
     }
-    handleTermSelector(){
+
+    handleTermSelector() {
         //Remove all terms.
-        setTimeout(()=>{cloudSvg.selectAll("*").transition().duration(1000).style(10e-6).remove()}, 0);
         this.changeLegendDisplay();
-        setTimeout(()=>{this.handler(_.difference(this.options, this.excluded_groups).map(d=>d.key), draw);}, 0);
+        this.handler(_.difference(this.options, this.excluded_groups).map(d => d.key), draw);
     }
 }
+
 let cloudViewOptions = [
     {key: 'vendor', text: 'vendors'},
     {key: 'product', text: 'products'},
@@ -172,6 +178,7 @@ function loadNewData() {
 }
 
 function draw(data) {
+    cloudSvg.selectAll("*").transition().duration(1000).style(10e-6).remove();
     let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
     var width = 1765;
     var height = 460;
@@ -247,7 +254,24 @@ function draw(data) {
             topic: function (d, i) {
                 return topics[i];
             }
-        });
+        }).on('click', function (d, i) {
+            let topic = topics[i];
+            mainGroup.selectAll('text').filter(t => {
+                return t && !t.cloned && t.placed && t.topic === topic;
+            }).attr({
+                visibility: 'visible'
+            });
+            //Remove the cloned element
+            document.querySelectorAll("g[cloned='true'][topic='" + topic + "']").forEach(node => {
+                node.parentNode.removeChild(node);
+            });
+            //Remove the added path for it
+            document.querySelectorAll("path[wordStream='true'][topic='" + topic + "']").forEach(node => {
+                node.parentNode.removeChild(node);
+            }
+        );
+    });
+    ;
     var allWords = [];
     d3.map(boxes.data, function (row) {
         boxes.topics.forEach(topic => {
@@ -265,6 +289,10 @@ function draw(data) {
     }
     var uniqueTerms = d3.set(terms).values();
     var termColorMap = colorNetwork;
+    var descriptionColorMap = d3.scale.ordinal()
+        .domain(uniqueTerms)
+        .range(c20.range());
+
     mainGroup.selectAll('g').data(allWords).enter().append('g')
         .attr({
             transform: function (d) {
@@ -280,7 +308,11 @@ function draw(data) {
                 return d.fontSize;
             },
             fill: function (d, i) {
-                return termColorMap(d.type);
+                if (d.type === 'description') {
+                    return descriptionColorMap(i);
+                } else {
+                    return termColorMap(d.type);
+                }
             },
             'text-anchor': 'middle',
             'alignment-baseline': 'middle',
@@ -405,24 +437,7 @@ function draw(data) {
         });
         allOtherTexts.attr('visibility', 'hidden');
     });
-    topics.forEach(topic => {
-        d3.select("path[topic='" + topic + "']").on('click', function () {
-            mainGroup.selectAll('text').filter(t => {
-                return t && !t.cloned && t.placed && t.topic === topic;
-            }).attr({
-                visibility: 'visible'
-            });
-            //Remove the cloned element
-            document.querySelectorAll("g[cloned='true'][topic='" + topic + "']").forEach(node => {
-                node.parentNode.removeChild(node);
-            });
-            //Remove the added path for it
-            document.querySelectorAll("path[wordStream='true'][topic='" + topic + "']").forEach(node => {
-                node.parentNode.removeChild(node);
-            });
-        });
 
-    });
 
     //Build the legends
     var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + (width - 200) + ',' + (10) + ')');

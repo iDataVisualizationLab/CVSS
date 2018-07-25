@@ -8,7 +8,7 @@
 
 //var colorNetwork = d3.scale.category10();
 function colorNetwork(type) {
-    var colores_g = ["#00a","#990099", "#854", "#33a"];
+    var colores_g = ["#00a","#990099", "#854", "#000"];
     if (type=="vendor")
         return colores_g[0];
     else if (type=="product")
@@ -50,7 +50,7 @@ function getNodeSize(d) {
    return  2+ Math.pow(d.data.length,0.4);
 }
 
-function processNetwork(data_) {
+function processNetwork(data_, groups) {
     var networkData = undefined;
     if (data_==undefined)
         networkData = data;
