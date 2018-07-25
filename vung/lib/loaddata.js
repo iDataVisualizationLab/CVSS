@@ -253,6 +253,7 @@ function loadCloudCVEs(viewOptions, draw) {
                 singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 45));
                 text = text.concat(singleViewOptionText);
             });
+            text = _.shuffle(text);
             d[d.key] = {
                 text: text,
                 frequency: frequency
