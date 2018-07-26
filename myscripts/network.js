@@ -329,7 +329,9 @@ function drawNetwork() {
     });
 }
 function onLinkCountFilerChange(){
+    setTimeout(drawNetwork, 0);
+}
+function onLInkCountInput(){
     linkCountThreshold = +$("#linkCount").val();
     $("#linkCountMsg").text(linkCountThreshold);
-    setTimeout(drawNetwork, 0);
 }

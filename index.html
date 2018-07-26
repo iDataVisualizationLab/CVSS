@@ -104,7 +104,10 @@
     <div id="networkContainer"></div>
     <div id="linkCountFilter">
         <p><h3>Link count filter:</h3>
-        <input type="range" min="0" step="1" value="5" max="100" id="linkCount" onchange="onLinkCountFilerChange()"/>
+        <input type="range" min="0" step="1" value="5" max="100" id="linkCount"
+               onchange="onLinkCountFilerChange()"
+                oninput="onLInkCountInput()"
+        />
         <output id="linkCountMsg">5</output>
         </p>
     </div>
