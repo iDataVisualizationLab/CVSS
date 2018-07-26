@@ -81,7 +81,7 @@
 
     </div>
     <div class="third">
-        <h3>Sample of 40 entries <input type="text" id="search" placeholder="Search CVSS..."></input></h3>
+        <h3>Sample of 40 entries <input type="text" id="search" placeholder="Search CVSS..."/></h3>
         <p id="food-list">
         </p>
     </div>
@@ -100,8 +100,16 @@
 </div>
 
 
-<div id="networkPanel" class="roundedBorder"></div>
+<div id="networkPanel" class="roundedBorder" style="overflow: hidden;">
+    <div id="networkContainer"></div>
+    <div id="linkCountFilter">
+        <p><h3>Link count filter:</h3>
+        <input type="range" min="0" step="1" value="5" max="100" id="linkCount" onchange="onLinkCountFilerChange()"/>
+        <output id="linkCountMsg">5</output>
+        </p>
+    </div>
 
+</div>
 
 </body>
 <script src="https://underscorejs.org/underscore.js"></script>

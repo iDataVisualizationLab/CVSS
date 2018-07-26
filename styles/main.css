@@ -73,3 +73,16 @@ canvas, svg {
   width: 70%;
   margin: 0 0%;
 }
+#linkCountFilter{
+  margin-left: 12px;
+  z-index: 11110;
+  position:absolute;
+  top: 12px;
+  left: 12px;
+  border-radius: 4px;
+  background-image: -webkit-linear-gradient(left, #fdfdfd, #f7f7f7);
+}
+#linkCountFilter h3{
+  display: inline;
+  font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
+}
