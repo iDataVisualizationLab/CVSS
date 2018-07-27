@@ -2,7 +2,7 @@ var interpolation = "basis";
 var placed = true;
 let maxFontSize = 40;
 let minFontSize = 8;
-let rotateCorner = 15;
+let rotateCorner = 90;
 let backgroundOpacity = 0.3;
 let timeStepFontSize = 10;
 let timeStepFontFamily = 'serif';
@@ -198,7 +198,8 @@ function draw(data) {
         .fontScale(d3.scale.linear())
         .minFontSize(minFontSize)
         .maxFontSize(maxFontSize)
-        .data(data);
+        .data(data)
+        .rotateCorner(rotateCorner);
     var boxes = ws.boxes();
 
     //Display data

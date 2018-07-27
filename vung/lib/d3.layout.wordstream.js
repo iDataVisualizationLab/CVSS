@@ -10,7 +10,11 @@ d3.layout.wordStream = function(){
         frequencyScale = d3.scale.linear(),
         spiral = achemedeanSpiral,
         canvas = cloudCanvas,
-        interpolation = "basis";
+        interpolation = "basis",
+        rotateCorner = 15,
+        self=this;
+
+
     var wordStream = {};
 
     var cloudRadians = Math.PI / 180,
@@ -309,7 +313,12 @@ d3.layout.wordStream = function(){
                         d = words[di];
                         c.save();
                         d.fontSize = ~~fontScale(d.frequency);
-                        d.rotate = (~~(Math.random() * 6) - 3) * rotateCorner;
+                        if(rotateCorner==90){
+                            d.rotate = 90*((Math.random()>0.5)?1:0);
+                        }else{
+                            d.rotate = (~~(Math.random() * 6) - 3) * rotateCorner;
+                        }
+
                         c.font = ~~(d.fontSize + 1) + "px " + font;
 
                         var w = ~~(c.measureText(d.text).width),
@@ -473,6 +482,9 @@ d3.layout.wordStream = function(){
     wordStream.fontScale = function(_){
         return arguments.length ? (fontScale = _, wordStream) : fontScale;
     };
+    wordStream.rotateCorner = function(_){
+        return arguments.length ? (rotateCorner = _, wordStream) : rotateCorner;
+    }
     //#endregion
     return wordStream;
 };
