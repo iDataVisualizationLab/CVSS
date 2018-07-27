@@ -402,8 +402,6 @@ function draw(data) {
                 $('#jsviewer').css("visibility", "visible");
                 var svgRect = document.getElementById("mainsvg").getBoundingClientRect();
                 var jsviewer = document.getElementById('jsviewer');
-                // jsviewer.style.top = (svgRect.top + svgRect.height + 20) + "px";
-                // jsviewer.style.left = (svgRect.left)+"px";
                 jsviewer.style.width = (svgRect.width) + "px";
 
             });

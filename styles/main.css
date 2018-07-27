@@ -86,3 +86,7 @@ canvas, svg {
   display: inline;
   font-family: Ubuntu, Tahoma, Helvetica, sans-serif;
 }
+#theCloud{
+  height: 550px;
+  overflow: visible;
+}
