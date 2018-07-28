@@ -82,9 +82,7 @@ d3.layout.wordStream = function(){
     }
     function buildFrequencyScale(data){
         let max = d3.max(data.map(d=>d.totalFrequencies));
-        frequencyScale = d3.scale.linear()
-        .domain([0, max])
-        .range([0, size[1]]);
+        frequencyScale.domain([0, max]).range([0, size[1]]);
     }
     //Convert from data to box
     function buildBoxes(data){
@@ -100,22 +98,22 @@ d3.layout.wordStream = function(){
         topics.forEach(topic=>{
             var dataPerTopic = [];
             //Push the first point
-            dataPerTopic.push({x: 0, y:totalFrequencies[0][topic]});
+            dataPerTopic.push({x: 0, y:frequencyScale(totalFrequencies[0][topic])});
             totalFrequencies.forEach((frq, i) =>{
-                dataPerTopic.push({x: (i*boxWidth) + (boxWidth>>1), y: frq[topic]});
+                dataPerTopic.push({x: (i*boxWidth) + (boxWidth>>1), y: frequencyScale(frq[topic])});
             });
             //Push the last point
-            dataPerTopic.push({x: size[0], y:totalFrequencies[totalFrequencies.length-1][topic]});
+            dataPerTopic.push({x: size[0], y:frequencyScale(totalFrequencies[totalFrequencies.length-1][topic])});
             allPoints.push(dataPerTopic);
         });
         var layers = d3.layout.stack().offset('silhouette')(allPoints);
-        //Process the scale of each box here.
-        layers.forEach(layer=>{
-            layer.forEach(point=>{
-                point.y0 = frequencyScale(point.y0);
-                point.y = frequencyScale(point.y);
-            });
-        });
+        //// Process the scale of each box here.
+        // layers.forEach(layer=>{
+        //     layer.forEach(point=>{
+        //         point.y0 = frequencyScale(point.y0);
+        //         point.y = frequencyScale(point.y);
+        //     });
+        // });
         var innerBoxes = {};
         topics.forEach((topic, i)=>{
             innerBoxes[topic] = [];
