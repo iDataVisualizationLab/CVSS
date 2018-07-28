@@ -92,7 +92,7 @@ background.lineWidth = 1;
 // SVG for ticks, labels, and interactions
 var svg = d3.select("#parallelSVG")
     .attr("width", w)
-    .attr("height", h+m[0])
+    .attr("height", h + m[0])
     .append("svg:g")
     .attr("transform", "translate(" + 0 + "," + m[0] + ")");
 
@@ -101,7 +101,7 @@ var svg = d3.select("#parallelSVG")
 //d3.json("data/nvdcve-1.0-2016.json", function(raw_data) {
 // d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 // d3.json("data/nvdcve-1.0-2018.json?raw=true", function(error, raw_data) {
-d3.json("data/isp1.json", function(error, raw_data) {
+d3.json("data/isp1.json", function (error, raw_data) {
 
     // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
     // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
@@ -109,25 +109,61 @@ d3.json("data/isp1.json", function(error, raw_data) {
 
 
     data = [];
-    for (var i = 0; i < raw_data.CVE_Items.length; i++) {
-        var d = raw_data.CVE_Items[i].impact.baseMetricV3;
+    // for (var i = 0; i < raw_data.CVE_Items.length; i++) {
+    //     var d = raw_data.CVE_Items[i].impact.baseMetricV3;
+    //     if (d != undefined) {
+    //         var obj = {};
+    //         if (raw_data.CVE_Items[i].cve == undefined)
+    //             obj.name = "";
+    //
+    //         else
+    //             obj.name = raw_data.CVE_Items[i].cve.description.description_data[0].value;
+    //         obj.group = d.cvssV3.baseSeverity;
+    //
+    //         // obj._id = data.length;
+    //         obj.cve = raw_data.CVE_Items[i].cve;
+    //         obj.originalCVE = raw_data.CVE_Items[i];
+    //         obj.impactScore = d.impactScore;
+    //         obj.exploitabilityScore = d.exploitabilityScore;
+    //         obj.baseScore = d.cvssV3.baseScore;
+    //         data.push(obj);
+    //     }
+    // }
+    raw_data = raw_data.CVE_Items;
+    for (var i = 0; i < raw_data.length; i++) {
+
+        var d = raw_data[i].impact.baseMetricV3;
         if (d != undefined) {
             var obj = {};
-            if (raw_data.CVE_Items[i].cve == undefined)
+            if (raw_data[i].cve == undefined)
                 obj.name = "";
-
             else
-                obj.name = raw_data.CVE_Items[i].cve.description.description_data[0].value;
+                obj.name = raw_data[i].cve.description.description_data[0].value;
             obj.group = d.cvssV3.baseSeverity;
-
             // obj._id = data.length;
-            obj.cve = raw_data.CVE_Items[i].cve;
-            obj.originalCVE = raw_data.CVE_Items[i];
+            obj.cve = raw_data[i].cve;
+            obj.originalCVE = raw_data[i];
             obj.impactScore = d.impactScore;
             obj.exploitabilityScore = d.exploitabilityScore;
             obj.baseScore = d.cvssV3.baseScore;
             data.push(obj);
         }
+        else if (raw_data[i].impact.baseMetricV2.cvssV2) {
+            var obj = {};
+            if (raw_data[i].cve == undefined)
+                obj.name = "";
+            else
+                obj.name = raw_data[i].cve.description.description_data[0].value;
+            obj.group = raw_data[i].impact.baseMetricV2.severity;
+            // obj._id = data.length;
+            obj.cve = raw_data[i].cve;
+            obj.originalCVE = raw_data[i];
+            obj.impactScore = raw_data[i].impact.baseMetricV2.impactScore;
+            obj.exploitabilityScore = raw_data[i].impact.baseMetricV2.exploitabilityScore;
+            obj.baseScore = raw_data[i].impact.baseMetricV2.cvssV2.baseScore;
+            data.push(obj);
+        }
+
     }
 
     // network *************************************************************************************************
@@ -553,14 +589,14 @@ function path(d, ctx, color) {
         y0 = yscale[dimensions[0]](d[dimensions[0]]);   // left edge
     ctx.moveTo(x0, y0);
     dimensions.map(function (p, i) {
-        var gap =0;
-        if (i==0)
-            gap=(width-600)/24;
-        var x = xscale(p)-gap,
+        var gap = 0;
+        if (i == 0)
+            gap = (width - 600) / 24;
+        var x = xscale(p) - gap,
             y = yscale[p](d[p]);
-        var cp1x = x - 0.8 * (x - x0)-gap;
+        var cp1x = x - 0.8 * (x - x0) - gap;
         var cp1y = y0;
-        var cp2x = x - 0.2 * (x - x0)-gap;
+        var cp2x = x - 0.2 * (x - x0) - gap;
         var cp2y = y;
         ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
         x0 = x;
@@ -692,7 +728,7 @@ function brush() {
 
     //Vung's word cloud
     cves = modifiedCVEsToOriginalCVEs(selected);
-    loadCloudCVEs(termSelector?termSelector.getViewOptions():cloudViewOptions.filter(d=>d.key!=='description').map(d=>d.key), draw);
+    loadCloudCVEs(termSelector ? termSelector.getViewOptions() : cloudViewOptions.filter(d => d.key !== 'description').map(d => d.key), draw);
 
     // Tommy 2018, NETWORK     **************************************
     processNetwork(selected);
