@@ -97,11 +97,11 @@ var svg = d3.select("#parallelSVG")
     .attr("transform", "translate(" + 0 + "," + m[0] + ")");
 
 // Load the data and visualization
-d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 CVEs
+// d3.json("data/nvdcve-1.0-2014.json", function (raw_data) {      // 2014 -> 653 CVEs
 //d3.json("data/nvdcve-1.0-2016.json", function(raw_data) {
 // d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 // d3.json("data/nvdcve-1.0-2018.json?raw=true", function(error, raw_data) {
-// d3.json("data/isp1.json", function (error, raw_data) {
+d3.json("data/isp1.json", function (error, raw_data) {
 
     // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
     // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
