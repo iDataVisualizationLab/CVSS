@@ -33,9 +33,9 @@ var  svgNetwork = d3.select("#networkContainer")
 var nodes=[], links=[];
 
 var force = d3.layout.force()
-    .gravity(0.11)
-    .distance(50)
-    .charge(-70)
+    .gravity(0.06)
+    .distance(80)
+    .charge(-90)
     .size([height+120, height]);
 
 
@@ -50,7 +50,7 @@ function isContainedName(a, name) {
     return -1;
 }
 function getNodeSize(d) {
-   return  2+ Math.pow(d.data.length,0.4);
+   return  2+ Math.pow(d.data.length,0.35);
 }
 
 function processNetwork(data_) {
@@ -220,7 +220,7 @@ function drawNetwork() {
     svgNetwork.selectAll("*").remove();
     let maxLinkCount = d3.max(links.map(d=>1+Math.pow(d.count-1,0.5)));
     $("#linkCount").attr("max", d3.max(links.map(d=>d.count)));
-    let forceStrengthScale = d3.scale.linear().domain([0, maxLinkCount]).range([0.2, 0.8]);
+    let forceStrengthScale = d3.scale.linear().domain([0, maxLinkCount]).range([0.2, 0.6]);
 
     // Filter by Link count *****************
     let countFilteredlinks = links.filter(function (l) {

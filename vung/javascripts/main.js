@@ -1,11 +1,14 @@
 var interpolation = "basis";
 var placed = true;
-let maxFontSize = 40;
-let minFontSize = 8;
+let maxFontSize = 26;
+let minFontSize = 12;
 let rotateCorner = 15;
-let backgroundOpacity = 0.3;
-let timeStepFontSize = 10;
+let backgroundOpacity = 0.2;
+let timeStepFontSize = 12;
 let timeStepFontFamily = 'serif';
+let font2 = "Arial";
+let minOpacity = 0.2;
+let maxOpacity = 1.0;
 
 var cloudSvg = d3.select("#theCloud").append('svg').attr({
     id: "mainsvg"
@@ -14,17 +17,7 @@ var cloudSvg = d3.select("#theCloud").append('svg').attr({
 var years = d3.range(2014, 2019, 1);
 
 var initialView = "vendors";
-var fileName;
-let year = 2017;
-//fileName = document.getElementById("datasetsSelect").value;
-// fileName = "nvdcve-1.0-2014";
-// fileName = "nvdcve-1.0-2015";
-// fileName = "nvdcve-1.0-2016";
-// fileName = "nvdcve-1.0-2017";
-fileName = "isp1";
-// fileName = "nvdcve-1.0-2018-1";
-// fileName = "nvdcve-1.0-2018";
-fileName = "../data/" + fileName + ".json";
+
 
 class TermSelector {
     constructor(theId, options, handler) {
@@ -40,7 +33,7 @@ class TermSelector {
     create_legend() {
         let self = this;
         // create legend
-        var legend_data = d3.select("#" + this.theId).style("width", "200px").style("overflow", "visible")
+        var legend_data = d3.select("#" + this.theId).style("width", "200px").style("overflow", "visible").style("margin-top", "15px")
             .html("")
             .selectAll(".row")
             .data(this.options)
@@ -125,67 +118,15 @@ let cloudViewOptions = [
     {key: 'description', text: 'description terms'},
 ];
 
-// function addOptions(controlId, values) {
-//     var select = document.getElementById(controlId);
-//     for (var i = 0; i < values.length; i++) {
-//         var opt = values[i];
-//         var el = document.createElement("option");
-//         el.textContent = opt;
-//         el.value = opt;
-//         select.appendChild(el);
-//         document.getElementById(controlId).value = initialView;
-//     }
-// }
-//
-// addOptions('viewTypeSelect', d3.keys(extractors));
-//
-//
-// function getViewOption() {
-//     let theViewTypeSelect = document.getElementById('viewTypeSelect');
-//     let option = theViewTypeSelect.options[theViewTypeSelect.selectedIndex].text;
-//     return option;
-// }
-
-var spinner;
-// function loadData(){
-//     // // START: loader spinner settings ****************************
-//     // var opts = {
-//     //     lines: 25, // The number of lines to draw
-//     //     length: 15, // The length of each line
-//     //     width: 5, // The line thickness
-//     //     radius: 25, // The radius of the inner circle
-//     //     color: '#000', // #rgb or #rrggbb or array of colors
-//     //     speed: 2, // Rounds per second
-//     //     trail: 50, // Afterglow percentage
-//     //     className: 'spinner', // The CSS class to assign to the spinner
-//     // };
-//     // var target = document.getElementById('loadingSpinner');
-//     // spinner = new Spinner(opts).spin(target);
-//     //loadCloudData(initialView, draw);
-// }
-// // loadData();
-
-function getViewOption() {
-    return 'vendors';
-}
-
-function loadNewCVEs() {
-    cloudSvg.selectAll("*").remove();
-    let option = getViewOption();
-    loadCloudCVEs(option, draw);
-}
-
-function loadNewData() {
-    cloudSvg.selectAll("*").remove();
-    let option = getViewOption();
-    loadCloudData(option, draw);
-}
 
 function draw(data) {
     cloudSvg.selectAll("*").transition().duration(1000).style(10e-6).remove();
     let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
+    let opacityScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([minOpacity, maxOpacity]);
     var width = 1765;
-    var height = 460;
+    var height = 600;
+    // var width = 2000;
+    // var height = 600;
     if (!data || data.length == 0) {
         return;
     }
@@ -199,7 +140,8 @@ function draw(data) {
         .minFontSize(minFontSize)
         .maxFontSize(maxFontSize)
         .data(data)
-        .rotateCorner(rotateCorner);
+        .rotateCorner(rotateCorner)
+        .font(font2);
     var boxes = ws.boxes();
 
     //Display data
@@ -225,6 +167,9 @@ function draw(data) {
     //Display time axes
     var dates = [];
     boxes.data.forEach(row => {
+        // if(row.date.indexOf("Jan")>=0){
+        //     dates.push(row.date);
+        // }
         dates.push(row.date);
     });
 
@@ -308,7 +253,7 @@ function draw(data) {
             return d.text;
         })
         .attr({
-            'font-family': 'Impact',
+            'font-family': font2,
             'font-size': function (d) {
                 return d.fontSize;
             },
@@ -327,7 +272,7 @@ function draw(data) {
             visibility: function (d, i) {
                 return d.placed ? (placed ? "visible" : "hidden") : (placed ? "hidden" : "visible");
             }
-        }).style('opacity', 10e-6).transition().duration(1000).style("opacity", 1.0);
+        }).style('opacity', 10e-6).transition().duration(1000).style("opacity", d=>opacityScale(d.fontSize));
     //Try
     var prevColor;
     //Highlight
@@ -440,6 +385,206 @@ function draw(data) {
         });
         allOtherTexts.attr('visibility', 'hidden');
     });
+
+
+    //Build the legends
+    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + (width - 200) + ',' + (10) + ')');
+    var legendNodes = legendGroup.selectAll('g').data(boxes.topics).enter().append('g')
+        .attr('transform', function (d, i) {
+            return 'translate(' + 10 + ',' + (i * legendFontSize) + ')';
+        });
+    legendNodes.append('circle').attr({
+        r: 5,
+        fill: function (d, i) {
+            return color(d, 1);
+        },
+        'fill-opacity': backgroundOpacity,
+        stroke: 'black',
+        'stroke-width': .5,
+    });
+    legendNodes.append('text').text(function (d) {
+        return d;
+    }).attr({
+        'font-size': legendFontSize,
+        'alignment-baseline': 'middle',
+        dx: 8
+    });
+
+    // spinner.stop();
+    function styleAxis(axisNodes) {
+        axisNodes.selectAll('.domain').attr({
+            fill: 'none'
+        });
+        axisNodes.selectAll('.tick line').attr({
+            fill: 'none',
+        });
+        let texts = axisNodes.selectAll('.tick text').attr({
+            'font-family': timeStepFontFamily,
+            'font-size': timeStepFontSize
+        });
+
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext('2d');
+        ctx.font = timeStepFontSize + "px " + timeStepFontFamily;
+        let maxTextWidth = 0;
+        let maxTextHeight = timeStepFontSize;
+        texts[0].forEach(t => {
+            let textWidth = ctx.measureText(t.innerHTML).width;
+            if (textWidth > maxTextWidth) maxTextWidth = textWidth;
+        });
+        //Data length
+        let dataLength = boxes.data.length;
+        //Available space per data item.
+        let availableSpace = width / dataLength;
+        if (availableSpace < maxTextWidth) {
+            //Rotate the text
+            let rotateDeg = Math.atan(maxTextHeight / availableSpace) * 180;
+            texts.attr({
+                'transform': `rotate(${rotateDeg})`
+            })
+        }
+
+    }
+
+    function styleGridlineNodes(gridlineNodes) {
+        gridlineNodes.selectAll('.domain').attr({
+            fill: 'none',
+            stroke: 'none'
+        });
+        gridlineNodes.selectAll('.tick line').attr({
+            fill: 'none',
+            'stroke-width': 0.7,
+            stroke: 'lightgray'
+        });
+    }
+
+    function color(d, a) {
+        if(d==='allTopics'){
+            return 'white';
+        }
+        var c = colors[d];
+        return ["hsla(", c[0], ",", c[1], "%,", c[2], "%,", a, ")"].join("");
+    }
+};
+function drawNoText(data) {
+    cloudSvg.selectAll("*").transition().duration(1000).style(10e-6).remove();
+    let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
+    var width = 1300;
+    var height = 460;
+    if (!data || data.length == 0) {
+        return;
+    }
+    //Layout data
+    var axisPadding = 0;
+    var margins = {left: 0, top: 0, right: 0, bottom: 40};
+    var ws = d3.layout.wordStream()
+        .size([width, height * 1.1])
+        .interpolate(interpolation)
+        .fontScale(d3.scale.linear())
+        .minFontSize(minFontSize)
+        .maxFontSize(maxFontSize)
+        .data(data)
+        .rotateCorner(rotateCorner);
+    var boxes = ws.boxes();
+
+    //Display data
+    var legendFontSize = 12;
+    var legendHeight = boxes.topics.length * legendFontSize;
+    //set svg data.
+    cloudSvg.attr({
+        width: width + margins.left + margins.top,
+        height: height + margins.top + margins.bottom + axisPadding + legendHeight
+    });
+
+    var area = d3.svg.area()
+        .interpolate(interpolation)
+        .x(function (d) {
+            return (d.x);
+        })
+        .y0(function (d) {
+            return d.y0;
+        })
+        .y1(function (d) {
+            return (d.y0 + d.y);
+        });
+    //Display time axes
+    var dates = [];
+    boxes.data.forEach(row => {
+        if(row.date.indexOf("Jan")>=0){
+            dates.push(row.date);
+        }
+        // dates.push(row.date);
+    });
+
+    var xAxisScale = d3.scale.ordinal().domain(dates).rangeBands([0, width]);
+    var xAxis = d3.svg.axis().orient('bottom').scale(xAxisScale);
+    var axisGroup = cloudSvg.append('g').attr('transform', 'translate(' + (margins.left) + ',' + (height + margins.top + axisPadding + legendHeight) + ')');
+    var axisNodes = axisGroup.call(xAxis);
+    styleAxis(axisNodes);
+    //Display the vertical gridline
+    var xGridlineScale = d3.scale.ordinal().domain(d3.range(0, dates.length + 1)).rangeBands([0, width + width / boxes.data.length]);
+    var xGridlinesAxis = d3.svg.axis().orient('bottom').scale(xGridlineScale);
+    var xGridlinesGroup = cloudSvg.append('g').attr('transform', 'translate(' + (margins.left - width / boxes.data.length / 2) + ',' + (height + margins.top + axisPadding + legendHeight + margins.bottom) + ')');
+    var gridlineNodes = xGridlinesGroup.call(xGridlinesAxis.tickSize(-height - axisPadding - legendHeight - margins.bottom, 0, 0).tickFormat(''));
+    styleGridlineNodes(gridlineNodes);
+    //Main group
+    var mainGroup = cloudSvg.append('g').attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
+    var wordStreamG = mainGroup.append('g');
+
+    var topics = boxes.topics;
+    mainGroup.selectAll('path')
+        .data(boxes.layers)
+        .enter()
+        .append('path')
+        .attr('d', area)
+        .style('fill', function (d, i) {
+            return color(topics[i], 1);
+        })
+        .attr({
+            'fill-opacity': backgroundOpacity,
+            stroke: 'black',
+            'stroke-width': 0.3,
+            topic: function (d, i) {
+                return topics[i];
+            }
+        }).on('click', function (d, i) {
+        let topic = topics[i];
+        mainGroup.selectAll('text').filter(t => {
+            return t && !t.cloned && t.placed && t.topic === topic;
+        }).attr({
+            visibility: 'visible'
+        });
+        //Remove the cloned element
+        document.querySelectorAll("g[cloned='true'][topic='" + topic + "']").forEach(node => {
+            node.parentNode.removeChild(node);
+        });
+        //Remove the added path for it
+        document.querySelectorAll("path[wordStream='true'][topic='" + topic + "']").forEach(node => {
+                node.parentNode.removeChild(node);
+            }
+        );
+    });
+    ;
+    var allWords = [];
+    d3.map(boxes.data, function (row) {
+        boxes.topics.forEach(topic => {
+            if (row.topics[topic]) {
+                allWords = allWords.concat(row.topics[topic].text);
+            }
+        });
+    });
+    var c20 = d3.scale.category20b();
+
+    //Color based on term
+    var terms = [];
+    for (let i = 0; i < allWords.length; i++) {
+        terms.concat(allWords[i].text);
+    }
+    var uniqueTerms = d3.set(terms).values();
+    var termColorMap = colorNetwork;
+    var descriptionColorMap = d3.scale.ordinal()
+        .domain(uniqueTerms)
+        .range(c20.range());
 
 
     //Build the legends

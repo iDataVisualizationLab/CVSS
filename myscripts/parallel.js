@@ -102,7 +102,8 @@ var svg = d3.select("#parallelSVG")
 // d3.json("data/nvdcve-1.0-2017.json", function(raw_data) {  // 2017 -> 12,829 CVEs
 // d3.json("data/nvdcve-1.0-2018.json?raw=true", function(error, raw_data) {
 d3.json("data/isp1.json", function (error, raw_data) {
-
+// d3.json("data/nvdcve20172018.json", function (error, raw_data) {
+// d3.json("data/allCVEs.json", function (error, raw_data) {
     // var data21 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data[0].description.length>1;})
     // var data22 = raw_data.CVE_Items.filter(function(d) {return d.cve.problemtype.problemtype_data.length>1;})
     //    var data33 = raw_data.CVE_Items.filter(function(d) {return d.cve.affects.vendor.vendor_data.length>2;})
@@ -129,7 +130,9 @@ d3.json("data/isp1.json", function (error, raw_data) {
     //         data.push(obj);
     //     }
     // }
-    raw_data = raw_data.CVE_Items;
+    if(raw_data.CVE_Items){
+        raw_data = raw_data.CVE_Items;
+    }
     for (var i = 0; i < raw_data.length; i++) {
 
         var d = raw_data[i].impact.baseMetricV3;
@@ -166,9 +169,10 @@ d3.json("data/isp1.json", function (error, raw_data) {
 
     }
 
+    //<editor-fold desc="process newwork">
     // network *************************************************************************************************
     processNetwork();
-
+    //</editor-fold>
     // Compute vendor order for Parallel Coordinates *****************************************************************************
     var data2 = [];
     data.forEach(function (d) {
@@ -296,7 +300,7 @@ d3.json("data/isp1.json", function (error, raw_data) {
         }
     });
 
-
+    //<editor-fold desc="process the parallel coordinates">
     // Extract the list of numerical dimensions and create a scale for each.
     xscale.domain(dimensions = d3.keys(data[0]).filter(function (k) {
         return (_.isNumber(data[0][k])) && (yscale[k] = d3.scale.linear()
@@ -406,6 +410,7 @@ d3.json("data/isp1.json", function (error, raw_data) {
 
     // Render full foreground
     brush();
+    //</editor-fold>
 
 });
 
@@ -624,7 +629,6 @@ function brush() {
             return !yscale[p].brush.empty();
         }),
         extents = actives.map(function (p) {
-            return yscale[p].brush.extent();
         });
 
     // hack to hide ticks beyond extent
@@ -729,6 +733,8 @@ function brush() {
     //Vung's word cloud
     cves = modifiedCVEsToOriginalCVEs(selected);
     loadCloudCVEs(termSelector ? termSelector.getViewOptions() : cloudViewOptions.filter(d => d.key !== 'description').map(d => d.key), draw);
+    // loadCloudCVEs(termSelector ? termSelector.getViewOptions() : cloudViewOptions.filter(d => d.key !== 'description').map(d => d.key), drawNoText);
+    // loadCloudCVEsOneTopic(termSelector ? termSelector.getViewOptions() : cloudViewOptions.filter(d => d.key !== 'description').map(d => d.key), draw);
 
     // Tommy 2018, NETWORK     **************************************
     processNetwork(selected);

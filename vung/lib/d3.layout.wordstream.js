@@ -5,15 +5,15 @@ d3.layout.wordStream = function(){
         size = [],
         maxFontSize= null,
         minFontSize = null,
-        font = "Impact",
+        font = "Arial",
         fontScale = d3.scale.linear(),
         frequencyScale = d3.scale.linear(),
+        // frequencyScale = d3.scale.pow().exponent(.5),
         spiral = achemedeanSpiral,
         canvas = cloudCanvas,
         interpolation = "basis",
         rotateCorner = 15,
         self=this;
-
 
     var wordStream = {};
 
@@ -103,7 +103,7 @@ d3.layout.wordStream = function(){
                 dataPerTopic.push({x: (i*boxWidth) + (boxWidth>>1), y: frequencyScale(frq[topic])});
             });
             //Push the last point
-            dataPerTopic.push({x: size[0], y:frequencyScale(totalFrequencies[totalFrequencies.length-1][topic])});
+            dataPerTopic.push({x: size[0], y:frequencyScale(totalFrequencies[totalFrequencies.length-1][topic])});//TODO:
             allPoints.push(dataPerTopic);
         });
         var layers = d3.layout.stack().offset('silhouette')(allPoints);
