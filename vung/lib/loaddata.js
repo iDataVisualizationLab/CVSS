@@ -189,8 +189,8 @@ function processViewOptions() {
 }
 
 function processCloudData(viewOptions) {
-    // let monthFormat = d3.time.format('%b %Y');
-    let monthFormat = d3.time.format('%Y');
+    let monthFormat = d3.time.format('%b %Y');
+    // let monthFormat = d3.time.format('%Y');
     var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
     data = data.map(d => {
         d.date = d.key;
@@ -256,8 +256,8 @@ function processCloudData(viewOptions) {
         return d;
     }).sort(function (a, b) {//sort by date
         return monthFormat.parse(a.date) - monthFormat.parse(b.date);
-    })
-        .slice(5, 20);
+    });
+        // .slice(5, 20);
     return data;
 }
 function processSingleCloudData(viewOptions) {

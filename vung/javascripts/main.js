@@ -124,7 +124,7 @@ function draw(data) {
     let fontStrokeScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([0.2, 1]);
     let opacityScale = d3.scale.linear().domain([minFontSize, maxFontSize]).range([minOpacity, maxOpacity]);
     var width = 1765;
-    var height = 600;
+    var height = 460;
     // var width = 2000;
     // var height = 600;
     if (!data || data.length == 0) {
@@ -134,7 +134,7 @@ function draw(data) {
     var axisPadding = 0;
     var margins = {left: 0, top: 0, right: 0, bottom: 40};
     var ws = d3.layout.wordStream()
-        .size([width, height * 1.1])
+        .size([width, height])
         .interpolate(interpolation)
         .fontScale(d3.scale.linear())
         .minFontSize(minFontSize)
