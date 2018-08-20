@@ -1,113 +1,37 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
 <html>
 <head>
-    <link rel="icon" type="image/gif"
-          href="images/b.png"/>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+    <meta name="description" content="CVExplorer: Multidimensional Visualization for Common Vulnerabilities and Exposures"/>
+    <meta name="keywords" content="CVExplorer: Multidimensional Visualization for Common Vulnerabilities and Exposures"/>
+    <meta name="author" content="CVExplorer"/>
+    <link rel="stylesheet" type="text/css" href="styles/default.css" media="screen"/>
+
     <title>CVExplorer</title>
-    <link rel="stylesheet" type="text/css" href="styles/parallel.css"/>
-    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
-    <script src="javascripts/d3.v3.min.js"></script>
-    <!--<script src="javascripts/d3.v2.js"></script>-->
-    <!--vung's external files-->
-    <script src="vung/lib/loaddata.js"></script>
-    <script src="vung/lib/d3.layout.wordstream.js"></script>
-    <script src="vung/javascripts/jquery/jquery-1.9.0.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="vung/styles/main.css" media="screen"/>
-    <script src="vung/lib/json-viewer/jquery.json-viewer.js"></script>
-    <link href="vung/lib/json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet"/>
-
 </head>
+
 <body>
-<div id="header">
+<div class="navigation">
     <h1>CVExplorer</h1>
-    <button title="Zoom in on selected data" id="keep-data" disabled="disabled">Keep</button>
-    <button title="Remove selected data" id="exclude-data" disabled="disabled">Exclude</button>
-    <button title="Export data as CSV" id="export-data">Export</button>
-    <div class="controls">
-        <strong id="rendered-count"></strong>/<strong id="selected-count"></strong>
-        <!--<strong id="data-count"></strong>-->
-        <div class="fillbar">
-            <div id="selected-bar">
-                <div id="rendered-bar">&nbsp;</div>
-            </div>
-        </div>
-        Lines at <strong id="opacity"></strong> opacity.
-        <span class="settings">
-        <button id="hide-ticks">Hide Ticks</button>
-        <button id="show-ticks" disabled="disabled">Show Ticks</button>
-        <button id="dark-theme">Dark</button>
-        <button id="light-theme" disabled="disabled">Light</button>
-      </span>
-    </div>
-    <div style="clear:both;"></div>
-</div>
-<div id="chart" class="roundedBorder">
-    <canvas id="background"></canvas>
-    <canvas id="foreground"></canvas>
-    <canvas id="highlight"></canvas>
-    <svg id="parallelSVG"></svg>
-</div>
-<div id="wrap" class="roundedBorder">
-    <div class="quarter" id="controls">
-        <h3>NVD Vulnerability Severity Ratings</h3>
-        <p id="legend">
-        </p>
+    <h2>Multidimensional Visualization for Common Vulnerabilities and Exposures</h2>
+    <div id="menu">
+        <nav>
+            <ul>
+                <li><a href="index.html"><span style="color:#fff"><b>Video</b></span></a></li>
+                <li><a href="demos.html"><span style="color:#888"><b>Demos</b></span></a></li>
 
-        <div class="bright">
-            <h3>What is this?</h3>
-            <p>
-                The parallel coordinates displays CVSS v3.0 on 3 main scores. Each CVE Entry is a polyline.
-                <br>
-                <a href="http://eagereyes.org/techniques/parallel-coordinate">Never heard of parallel coordinates? Read
-                    this tutorial.</a>
-            </p>
-        </div>
-
-        <div class="little-box">
-            <h3>Controls</h3>
-            <p>
-                <strong>Click </strong>:
-                Click on the above bars to select the group of interest. <br/>
-                <strong>Brush</strong>: Drag vertically along an axis.<br/>
-                <strong>Remove Brush</strong>: Tap the axis background.<br/>
-                <strong>Reorder Axes</strong>: Drag a label horizontally.<br/>
-                <strong>Invert Axis</strong>: Tap an axis label.<br/>
-                <strong>Remove Axis</strong>: Drag axis label to the left edge.<br/>
-            </p>
-        </div>
-
-    </div>
-    <div class="third">
-        <h3>Sample of 40 entries <input type="text" id="search" placeholder="Search CVSS..."></input></h3>
-        <p id="food-list">
-        </p>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
+<center><iframe width="99%" height="1000" src="https://www.youtube.com/embed/I4qp0en1vPQ" frameborder="0" allowfullscreen></iframe></center>
 
-<div id="chart2" class="roundedBorder">
-    <div id="timedWordleViewOption">
-        <h3>Select topic(s) for WordStream</h3>
-        <p id="viewTypeSelect"></p>
-    </div>
-    <div id="theCloud"></div>
-    <div id="jsviewer" style="visibility: hidden;position: relative;">
-                <pre id="json-renderer"
-                     style=" border: 1px solid #aaa; padding: 0.5em 1.5em; font-family: sans-serif;"></pre>
-    </div>
+<div class="footer">
+    <span class="right">&copy; Last revised: July 22, 2018</span>
+    <div class="clearer"><span></span></div>
 </div>
-
-
-<div id="networkPanel" class="roundedBorder"></div>
-
-
+</div>
 </body>
-<script src="https://underscorejs.org/underscore.js"></script>
-<!--<script src="myscripts/cloud.js"></script>-->
-<script src="myscripts/parallel.js"></script>
-<script src="myscripts/network.js"></script>
-<!--vung's main.js-->
-<script src="vung/javascripts/main.js"></script>
 </html>

@@ -5,12 +5,16 @@ d3.layout.wordStream = function(){
         size = [],
         maxFontSize= null,
         minFontSize = null,
-        font = "Impact",
+        font = "Arial",
         fontScale = d3.scale.linear(),
         frequencyScale = d3.scale.linear(),
+        // frequencyScale = d3.scale.pow().exponent(.5),
         spiral = achemedeanSpiral,
         canvas = cloudCanvas,
-        interpolation = "basis";
+        interpolation = "basis",
+        rotateCorner = 15,
+        self=this;
+
     var wordStream = {};
 
     var cloudRadians = Math.PI / 180,
@@ -78,9 +82,7 @@ d3.layout.wordStream = function(){
     }
     function buildFrequencyScale(data){
         let max = d3.max(data.map(d=>d.totalFrequencies));
-        frequencyScale = d3.scale.linear()
-        .domain([0, max])
-        .range([0, size[1]]);
+        frequencyScale.domain([0, max]).range([0, size[1]]);
     }
     //Convert from data to box
     function buildBoxes(data){
@@ -96,22 +98,22 @@ d3.layout.wordStream = function(){
         topics.forEach(topic=>{
             var dataPerTopic = [];
             //Push the first point
-            dataPerTopic.push({x: 0, y:totalFrequencies[0][topic]});
+            dataPerTopic.push({x: 0, y:frequencyScale(totalFrequencies[0][topic])});
             totalFrequencies.forEach((frq, i) =>{
-                dataPerTopic.push({x: (i*boxWidth) + (boxWidth>>1), y: frq[topic]});
+                dataPerTopic.push({x: (i*boxWidth) + (boxWidth>>1), y: frequencyScale(frq[topic])});
             });
             //Push the last point
-            dataPerTopic.push({x: size[0], y:totalFrequencies[totalFrequencies.length-1][topic]});
+            dataPerTopic.push({x: size[0], y:frequencyScale(totalFrequencies[totalFrequencies.length-1][topic])});//TODO:
             allPoints.push(dataPerTopic);
         });
         var layers = d3.layout.stack().offset('silhouette')(allPoints);
-        //Process the scale of each box here.
-        layers.forEach(layer=>{
-            layer.forEach(point=>{
-                point.y0 = frequencyScale(point.y0);
-                point.y = frequencyScale(point.y);
-            });
-        });
+        //// Process the scale of each box here.
+        // layers.forEach(layer=>{
+        //     layer.forEach(point=>{
+        //         point.y0 = frequencyScale(point.y0);
+        //         point.y = frequencyScale(point.y);
+        //     });
+        // });
         var innerBoxes = {};
         topics.forEach((topic, i)=>{
             innerBoxes[topic] = [];
@@ -309,7 +311,12 @@ d3.layout.wordStream = function(){
                         d = words[di];
                         c.save();
                         d.fontSize = ~~fontScale(d.frequency);
-                        d.rotate = (~~(Math.random() * 6) - 3) * rotateCorner;
+                        if(rotateCorner==90){
+                            d.rotate = 90*((Math.random()>0.5)?1:0);
+                        }else{
+                            d.rotate = (~~(Math.random() * 6) - 3) * rotateCorner;
+                        }
+
                         c.font = ~~(d.fontSize + 1) + "px " + font;
 
                         var w = ~~(c.measureText(d.text).width),
@@ -473,6 +480,9 @@ d3.layout.wordStream = function(){
     wordStream.fontScale = function(_){
         return arguments.length ? (fontScale = _, wordStream) : fontScale;
     };
+    wordStream.rotateCorner = function(_){
+        return arguments.length ? (rotateCorner = _, wordStream) : rotateCorner;
+    }
     //#endregion
     return wordStream;
 };

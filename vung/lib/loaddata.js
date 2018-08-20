@@ -159,51 +159,6 @@ function searchCVEs(month, baseSeverity, type, term) {
     return filteredCVEs;
 }
 
-function loadCloudData(viewOption, draw) {
-    d3.json(fileName, function (error, rawData) {
-        if (error) throw error;
-        //filter by years.
-        cves = rawData['CVE_Items'];
-        let year1 = new Date(year + '-01-01T00:00Z');
-        let year2 = new Date((year + 1) + '-01-01T00:00Z');
-        //Filter by date
-        cves = cves.filter(d => {
-            let date = new Date(d[dateType]);
-            return (date >= year1) && (date < year2);
-        });
-        loadCloudCVEs(viewOption, draw);
-    });
-}
-
-function loadISPCloudData(viewOption, draw) {
-    let fileName = "../data/isp1.json";
-    // let fileName = "../data/allCVEs.json";
-    d3.json(fileName, function (error, rawData) {
-        if (error) throw error;
-        cves = rawData;
-        // //Filter date
-        // let year1 = new Date(2010 + '-01-01T00:00Z');
-        // let year2 = new Date((2018 + 1) + '-01-01T00:00Z');
-        // //Filter by date
-        // cves = cves.filter(d => {
-        //     let date = new Date(d[dateType]);
-        //     return (date >= year1) && (date < year2);
-        // });
-        loadCloudCVEs(viewOption, draw);
-    });
-}
-
-function loadISPData() {
-    loadISPCloudData("vendors", draw)
-}
-
-function loadData() {
-    year = +$("#cveYear").val();
-    fileName = "nvdcve-1.0-" + year;
-    fileName = "../data/" + fileName + ".json";
-    loadCloudData("vendors", draw);
-}
-
 function modifiedCVEsToOriginalCVEs(theCves) {
     return theCves.map(d => d['originalCVE']);
 }
@@ -235,6 +190,7 @@ function processViewOptions() {
 
 function processCloudData(viewOptions) {
     let monthFormat = d3.time.format('%b %Y');
+    // let monthFormat = d3.time.format('%Y');
     var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
     data = data.map(d => {
         d.date = d.key;
@@ -270,7 +226,7 @@ function processCloudData(viewOptions) {
                 }).filter(function (d) {
                     return d.text;
                 });//filter out empty words
-                singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 45));
+                singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 60));
                 text = text.concat(singleViewOptionText);
             });
             text = _.shuffle(text);
@@ -301,6 +257,69 @@ function processCloudData(viewOptions) {
     }).sort(function (a, b) {//sort by date
         return monthFormat.parse(a.date) - monthFormat.parse(b.date);
     });
+        // .slice(5, 20);
+    return data;
+}
+function processSingleCloudData(viewOptions) {
+    var data = d3.nest().key(d => "allDates").entries(cves);
+    data = data.map(d => {
+        d.date = d.key;
+        d.totalFrequencies = d.values.length;
+        let nestedTopics = d3.nest().key(d => "allTopics").entries(d.values);
+        //Filter the null key
+        nestedTopics = nestedTopics.filter(d => d.key !== 'null');
+        let topics = nestedTopics.map(d => {
+            let frequency = d.values.length;
+            let key = d.key;
+            let text = [];
+            viewOptions.forEach(viewOption => {
+                let singleViewOptionText;
+                let allTerms = extractors[viewOption](d);
+                //Count frequencies
+                let counts = allTerms.reduce(function (obj, word) {
+                    if (!obj[word]) {
+                        obj[word] = 0;
+                    }
+                    obj[word]++;
+                    return obj;
+                }, {});
+                //Convert to array of objects
+                singleViewOptionText = d3.keys(counts).map(function (d) {
+                    return {
+                        text: d,
+                        frequency: counts[d],
+                        topic: key,
+                        type: viewOption
+                    }
+                }).sort(function (a, b) {//sort the terms by frequency
+                    return b.frequency - a.frequency;
+                }).filter(function (d) {
+                    return d.text;
+                });//filter out empty words
+                singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 80));
+                text = text.concat(singleViewOptionText);
+            });
+            text = _.shuffle(text);
+            d[d.key] = {
+                text: text,
+                frequency: frequency
+            };
+            delete d.key;
+            delete d.values;
+            return d;
+        });
+
+        d.topics = {};
+
+        topics.forEach(topic => {
+            for (let key in topic) {
+                d.topics[key] = topic[key];
+            }
+        });
+        delete d.values;
+        delete d.key;
+        return d;
+    });
     return data;
 }
 
@@ -316,7 +335,21 @@ function loadCloudCVEs(viewOptions, draw) {
     processViewOptions();
     draw(data);
 }
+function loadCloudCVEsOneTopic(viewOptions, draw) {
+    if (!cves || cves.length == 0) {
+        draw(null);
+        return;
+    }
+    var data = processSingleCloudData(viewOptions);
+    //TODO: This is a quick fix => trick by calculating this for the first time => so if first time we do not load 4 options => need to do this calculation separately.
+    //Calculate the view options if it is not calculated.
+    //For the first time it will load all four view options and also it will not have count frequencies => so we will calculate this
+    processViewOptions();
+    //Now remove all topics by setting them into one.
+    //Remove all dates by setting them into one.
 
+    draw(data);
+}
 function accessChain(obj, chain) {
     let result = obj;
     for (let i = 0; i < chain.length; i++) {

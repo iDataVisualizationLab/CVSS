@@ -21,19 +21,22 @@ function colorNetwork(type) {
 }
 
 
-var  svgNetwork = d3.select("#networkPanel")
+var  svgNetwork = d3.select("#networkContainer")
     .append("svg")
-    .attr("width", height+100)
-    .attr("height",height);
+    .attr("width", height+140)
+    .attr("height",height)
+    .style("position", "relative")
+    .style("overflow", "hidden")
+    .style("z-index", 10);
+
 
 var nodes=[], links=[];
 
 var force = d3.layout.force()
-    .gravity(0.18)
-    .distance(50)
-    .charge(-70)
-    .size([height+140, height]);
- 
+    .gravity(0.06)
+    .distance(80)
+    .charge(-90)
+    .size([height+120, height]);
 
 
  // check if a node for  already exist.
@@ -47,7 +50,7 @@ function isContainedName(a, name) {
     return -1;
 }
 function getNodeSize(d) {
-   return  2+ Math.pow(d.data.length,0.4);
+   return  2+ Math.pow(d.data.length,0.35);
 }
 
 function processNetwork(data_) {
@@ -212,18 +215,16 @@ function processNetwork(data_) {
 
     });
 }
-
-
+let linkCountThreshold = 5;
 function drawNetwork() {
     svgNetwork.selectAll("*").remove();
     let maxLinkCount = d3.max(links.map(d=>1+Math.pow(d.count-1,0.5)));
-    let forceStrengthScale = d3.scale.linear().domain([0, maxLinkCount]).range([0.2, 0.8]);
+    $("#linkCount").attr("max", d3.max(links.map(d=>d.count)));
+    let forceStrengthScale = d3.scale.linear().domain([0, maxLinkCount]).range([0.2, 0.6]);
 
-
-
-    // Filet by Link count *****************
-    links = links.filter(function (l) {
-        return l.count>=5;
+    // Filter by Link count *****************
+    let countFilteredlinks = links.filter(function (l) {
+        return l.count>=linkCountThreshold;
     });
     //Filter by visibleGroups
     //if(viewing by description) then don't draw the network at all
@@ -233,24 +234,22 @@ function drawNetwork() {
     }
     // Remove SINGLE nodes  **************************************************
     var str =" "
-    for (var i=0; i< links.length;i++){
-        var id1 = links[i].source.name;
+    for (var i=0; i< countFilteredlinks.length;i++){
+        var id1 = countFilteredlinks[i].source.name;
         if (str.indexOf(" "+id1+" ") <0 )
             str+=id1 +" ";
-        var id2 = links[i].target.name;
+        var id2 = countFilteredlinks[i].target.name;
         if (str.indexOf(" "+id2+" ") <0 )
             str+=id2 +" ";
     }
 
-    nodes = nodes.filter(function(d){
+    let linkCountFilteredNodes = nodes.filter(function(d){
         return str.indexOf(" "+d.name+" ")>=0;
     })
 
     //Filter the nodes which are not in the visible options
-    let filteredNodes = nodes.filter(n=>_.contains(viewOptions, n.type));
-    let filteredLinks = links.filter(l=>_.contains(viewOptions, l.source.type) && _.contains(viewOptions, l.target.type));
-    debugger
-    //Filter the links which are not in the visible options
+    let filteredNodes = linkCountFilteredNodes.filter(n=>_.contains(viewOptions, n.type));
+    let filteredLinks = countFilteredlinks.filter(l=>_.contains(viewOptions, l.source.type) && _.contains(viewOptions, l.target.type));
 
     force
         .nodes(filteredNodes)
@@ -328,6 +327,11 @@ function drawNetwork() {
             return "translate(" + d.x + "," + d.y + ")";
         });
     });
-
-
+}
+function onLinkCountFilerChange(){
+    setTimeout(drawNetwork, 0);
+}
+function onLInkCountInput(){
+    linkCountThreshold = +$("#linkCount").val();
+    $("#linkCountMsg").text(linkCountThreshold);
 }
