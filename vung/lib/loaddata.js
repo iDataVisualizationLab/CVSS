@@ -141,10 +141,11 @@ function productExtractor(d) {
 let cves = null;
 
 function searchCVEs(month, baseSeverity, type, term) {
-    let monthFormat = d3.time.format('%b %Y');
+    // let dateFormat = d3.time.format('%b %Y');
+    let dateFormat = d3.time.format('%Y');
     let filteredCVEs = cves.filter(cve => {
         //Date condition
-        let date = monthFormat(new Date(cve[dateType]));
+        let date = dateFormat(new Date(cve[dateType]));
         let dateCondition = date === month;
         //baseSeverity condition
         let cveBaseSeverity = baseSeverityExtractor(cve, baseSeverityAccessChain);
@@ -189,9 +190,9 @@ function processViewOptions() {
 }
 
 function processCloudData(viewOptions) {
-    let monthFormat = d3.time.format('%b %Y');
-    // let monthFormat = d3.time.format('%Y');
-    var data = d3.nest().key(d => monthFormat(new Date(d[dateType]))).entries(cves);
+    let dateFormat = d3.time.format('%Y');
+    // let dateFormat = d3.time.format('%b %Y');
+    var data = d3.nest().key(d => dateFormat(new Date(d[dateType]))).entries(cves);
     data = data.map(d => {
         d.date = d.key;
         d.totalFrequencies = d.values.length;
@@ -226,7 +227,7 @@ function processCloudData(viewOptions) {
                 }).filter(function (d) {
                     return d.text;
                 });//filter out empty words
-                singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 60));
+                singleViewOptionText = singleViewOptionText.slice(0, Math.min(singleViewOptionText.length, 30));
                 text = text.concat(singleViewOptionText);
             });
             text = _.shuffle(text);
@@ -255,9 +256,9 @@ function processCloudData(viewOptions) {
         delete d.key;
         return d;
     }).sort(function (a, b) {//sort by date
-        return monthFormat.parse(a.date) - monthFormat.parse(b.date);
-    });
-        // .slice(5, 20);
+        return dateFormat.parse(a.date) - dateFormat.parse(b.date);
+    })
+        .slice(5, 60);
     return data;
 }
 function processSingleCloudData(viewOptions) {

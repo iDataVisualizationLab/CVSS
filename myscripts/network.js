@@ -33,9 +33,9 @@ var  svgNetwork = d3.select("#networkContainer")
 var nodes=[], links=[];
 
 var force = d3.layout.force()
-    .gravity(0.06)
-    .distance(80)
-    .charge(-90)
+    .gravity(0.065)
+    .distance(70)
+    .charge(-80)
     .size([height+120, height]);
 
 

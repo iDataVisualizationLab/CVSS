@@ -80,6 +80,7 @@ canvas, svg {
   top: 20px;
   left: 0px;
   border-radius: 4px;
+  background-color: white;
   /* background-image: -webkit-linear-gradient(left, #fdfdfd, #f7f7f7); */
 }
 #linkCountFilter h3{

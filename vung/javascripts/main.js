@@ -388,7 +388,7 @@ function draw(data) {
 
 
     //Build the legends
-    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + (width - 200) + ',' + (10) + ')');
+    var legendGroup = cloudSvg.append('g').attr('transform', 'translate(' + 65 + ',' + (85) + ')');
     var legendNodes = legendGroup.selectAll('g').data(boxes.topics).enter().append('g')
         .attr('transform', function (d, i) {
             return 'translate(' + 10 + ',' + (i * legendFontSize) + ')';
